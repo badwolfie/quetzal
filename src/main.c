@@ -1,7 +1,4 @@
-#include <glib/gi18n-lib.h>
 #include <locale.h>
-#include <stdio.h>
-
 #include "qt-application.h"
 
 int 

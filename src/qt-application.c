@@ -1,3 +1,4 @@
+#include <glib/gi18n-lib.h>
 #include "qt-application.h"
 
 struct _QtApplication
@@ -35,7 +36,7 @@ qt_about_activated (GSimpleAction * action, GVariant * parameter, gpointer app)
 		NULL 
 	};
 
-	gchar * translator_credits = _("translator-credits");
+	gchar * translator_credits = _ ("translator-credits");
 
 	gchar * license = "Pendiente...";
 
@@ -46,13 +47,13 @@ qt_about_activated (GSimpleAction * action, GVariant * parameter, gpointer app)
 	gtk_about_dialog_set_program_name(about_dialog, APP_NAME);
 	gtk_about_dialog_set_comments (about_dialog, APP_SHORTDESC);
 	gtk_about_dialog_set_authors (about_dialog, author);
-	gtk_about_dialog_add_credit_section (about_dialog, _("Contributors"), contrib);
-	// gtk_about_dialog_set_logo_icon_name (about_dialog, "ecced");
+	gtk_about_dialog_add_credit_section (about_dialog, _ ("Contributors"), contrib);
+	// gtk_about_dialog_set_logo_icon_name (about_dialog, "quetzal");
 	gtk_about_dialog_set_license (about_dialog, license);
 	gtk_about_dialog_set_version (about_dialog, APP_VERSION);
 	gtk_about_dialog_set_website (about_dialog, 
 		"https://github.com/badwolfie/quetzal");
-	gtk_about_dialog_set_website_label (about_dialog, _("Web page"));
+	gtk_about_dialog_set_website_label (about_dialog, _ ("Web page"));
 	gtk_about_dialog_set_copyright (about_dialog, 
 		"Copyright \xc2\xa9 2015 Ian Hernández");
 	
@@ -71,9 +72,9 @@ qt_application_init (QtApplication * self)
 {}
 
 static GActionEntry quetzal_app_entries[] = {
-	{ "prefs", ecced_about_activated, NULL, NULL, NULL }, 
-	{ "about", ecced_about_activated, NULL, NULL, NULL }, 
-	{ "quit", ecced_quit_activated, NULL, NULL, NULL }
+	{ "prefs", qt_about_activated, NULL, NULL, NULL }, 
+	{ "about", qt_about_activated, NULL, NULL, NULL }, 
+	{ "quit", qt_quit_activated, NULL, NULL, NULL }
 };
 
 static void 

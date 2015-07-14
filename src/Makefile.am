@@ -14,6 +14,8 @@ AM_CFLAGS = \
 	-Wall
 
 quetzal_SOURCES = \
+	qt-application.c qt-application.h \
+	main.c \
 	$(BUILT_SOURCES)
 
 quetzal_LDADD = \
