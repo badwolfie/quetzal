@@ -1,0 +1,314 @@
+# Spanish translations for Simple Text package.
+# Traducciones en español para el paquete Simple Text.
+# Copyright (C) 2015 Ian Hernández
+# This file is distributed under the same license as the Simple Text package.
+# Ian Hernández <ihernandezs@openmailbox.org>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Text 0.9.7\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-11 21:24-0500\n"
+"PO-Revision-Date: 2015-05-11 21:24-0500\n"
+"Last-Translator: Ian Hernández <ihernandezs@openmailbox.org>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+
+#: ../data/menu.ui.h:1 ../src/st-preferences-dialog.vala:57
+msgid "Preferences"
+msgstr "Preferencias"
+
+#: ../data/menu.ui.h:2 ../src/st-application.vala:218
+msgid "About"
+msgstr "Acerca de"
+
+#: ../data/menu.ui.h:3
+msgid "Quit"
+msgstr "Salir"
+
+#: ../src/st-header-bar.vala:41 ../src/st-main-window.vala:435
+msgid "Open"
+msgstr "Abrir"
+
+#: ../src/st-header-bar.vala:42
+msgid "Open file"
+msgstr "Abrir archivo"
+
+#: ../src/st-header-bar.vala:50 ../src/st-statusbar.vala:75
+msgid "New file"
+msgstr "Nuevo archivo"
+
+#: ../src/st-main-window.vala:13 ../src/st-tab.vala:11
+msgid "Untitled file"
+msgstr "Archivo sin nombre"
+
+#: ../src/st-header-bar.vala:45 ../src/st-main-window.vala:527
+#: ../src/st-main-window.vala:579 ../src/st-main-window.vala:962
+msgid "Save"
+msgstr "Guardar"
+
+#: ../src/st-header-bar.vala:46
+msgid "Save file"
+msgstr "Guardad archivo"
+
+#: ../src/st-main-window.vala:434 ../src/st-main-window.vala:526
+#: ../src/st-main-window.vala:578 ../src/st-main-window.vala:961
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: ../data/menu.ui.h:7
+msgid "Save as..."
+msgstr "Guardar como..."
+
+#: ../data/menu.ui.h:15
+msgid "Next tab"
+msgstr "Pestaña siguiente"
+
+#: ../data/menu.ui.h:16
+msgid "Previous tab"
+msgstr "Pestaña anterior"
+
+#: ../data/menu.ui.h:18
+msgid "Close current tab"
+msgstr "Cerrar pestaña actual"
+
+#: ../data/menu.ui.h:17
+msgid "Reopen last tab"
+msgstr "Re-abrir última pestaña"
+
+#: ../src/st-application.vala:223
+msgid "Web page"
+msgstr "Página web"
+
+#: ../src/st-application.vala:231
+msgid "Contributors"
+msgstr "Contribuidores"
+
+#: ../data/menu.ui.h:11 ../src/st-preferences-dialog.vala:65
+msgid "View"
+msgstr "Ver"
+
+#: ../src/st-preferences-dialog.vala:71
+msgid "Show line numbers"
+msgstr "Mostrar números de línea"
+
+#: ../src/st-preferences-dialog.vala:77
+msgid "Show right margin on column:"
+msgstr "Mostrar margen derecho en la columna:"
+
+#: ../src/st-preferences-dialog.vala:113
+msgid "Show grid pattern"
+msgstr "Mostrar patrón de cuadrícula"
+
+#: ../src/st-preferences-dialog.vala:96
+msgid "Highlighting"
+msgstr "Resaltado"
+
+#: ../src/st-preferences-dialog.vala:101
+msgid "Highlight current line"
+msgstr "Resaltar la línea actual"
+
+#: ../src/st-preferences-dialog.vala:107
+msgid "Highlight matching brackets"
+msgstr "Resaltar parejas de corchetes"
+
+#: ../src/st-preferences-dialog.vala:66
+msgid "Editor"
+msgstr "Editor"
+
+#: ../src/st-preferences-dialog.vala:132
+msgid "Tab width:"
+msgstr "Anchura del tabulador"
+
+#: ../src/st-preferences-dialog.vala:160
+msgid "Indent using spaces"
+msgstr "Insertar espacios en lugar de tabuladores"
+
+#: ../src/st-preferences-dialog.vala:169
+msgid "Activate auto indent"
+msgstr "Activar sangría automática"
+
+#: ../src/st-preferences-dialog.vala:67
+msgid "Typography and colors"
+msgstr "Tipografías y colores"
+
+#: ../src/st-preferences-dialog.vala:207
+msgid "Typography"
+msgstr "Tipografía"
+
+#: ../src/st-preferences-dialog.vala:212
+msgid "Use default typography"
+msgstr "Usar tipografía por defecto"
+
+#: ../src/st-preferences-dialog.vala:230
+msgid "Color Scheme"
+msgstr "Esquema de color"
+
+#: ../src/st-preferences-dialog.vala:243
+msgid "Use dark theme variant"
+msgstr "Usar variante oscura del tema"
+
+#: ../data/simple-text.desktop.in.h:2
+msgid "Text Editor"
+msgstr "Editor de textos"
+
+#: ../src/st-main-window.vala:958
+msgid "Do you wish to save changes before closing?"
+msgstr "¿Desea guardad los cambios antes de cerrar?"
+
+#: ../src/st-main-window.vala:954
+msgid "Confirm operation"
+msgstr "Confirmar operación"
+
+#: ../src/st-main-window.vala:960
+msgid "Close without saving"
+msgstr "Cerrar sin guardar"
+
+#: ../src/st-main-window.vala:221
+msgid "Enter your search..."
+msgstr "Introduzca su búsqueda..."
+
+#: ../src/st-main-window.vala:432
+msgid "Open File"
+msgstr "Abrir ar"
+
+#: ../src/st-main-window.vala:524 ../src/st-main-window.vala:576
+msgid "Save File"
+msgstr "Guardad archivo"
+
+#: ../src/st-main-window.vala:657
+msgid "Build successful!"
+msgstr "¡Compilación exitosa!"
+
+#: ../src/st-main-window.vala:660
+msgid "An error has occurred!"
+msgstr "¡Ha ocurrido un error!"
+
+#: ../src/st-main-window.vala:665
+msgid "Build system"
+msgstr "Sistema de compilación"
+
+#: ../src/st-main-window.vala:666
+msgid "Accept"
+msgstr "Aceptar"
+
+#: ../src/st-language-picker.vala:32
+msgid "Search highlight mode..."
+msgstr "Buscar modo de resaltado..."
+
+#: ../src/st-application.vala:198
+msgid "translator-credits"
+msgstr "Ian Hernández"
+
+#: ../data/menu.ui.h:9
+msgid "Search..."
+msgstr "Buscar..."
+
+#: ../src/st-preferences-dialog.vala:128
+msgid "Indentation"
+msgstr "Tabulación"
+
+#: ../data/simple-text.desktop.in.h:1
+msgid "Simple Text"
+msgstr "Simple Text"
+
+#: ../data/simple-text.desktop.in.h:4
+msgid "text;editor;development;programming;"
+msgstr "texto;editor;desarrollo;programación"
+
+#: ../data/simple-text.desktop.in.h:3 ../src/st-application.vala:221
+msgid "A not so simple text and code editor written in Vala"
+msgstr "Un editor de texto y código, no tan simple, escrito en Vala."
+
+#: ../src/st-statusbar.vala:78
+msgid "Opened"
+msgstr "Abierto"
+
+#: ../src/st-statusbar.vala:81
+msgid "Editing..."
+msgstr "Editando..."
+
+#: ../src/st-statusbar.vala:84
+msgid "Saved"
+msgstr "Guardado"
+
+#: ../src/st-statusbar.vala:87
+msgid "Closed"
+msgstr "Cerrado"
+
+#: ../src/st-statusbar.vala:93
+msgid "Done"
+msgstr "Hecho"
+
+#: ../src/st-statusbar.vala:96
+msgid "Failed"
+msgstr "Fallado"
+
+#: ../data/menu.ui.h:4
+msgid "Reload"
+msgstr "Recargar"
+
+#: ../data/menu.ui.h:5
+msgid "Build"
+msgstr "Compilar"
+
+#: ../data/menu.ui.h:6
+msgid "Fullscreen"
+msgstr "Pantalla completa"
+
+#: ../data/menu.ui.h:8
+msgid "Save all"
+msgstr "Guardar todo"
+
+#: ../data/menu.ui.h:10
+msgid "Search and replace"
+msgstr "Buscar y reemplazar"
+
+#: ../data/menu.ui.h:12
+msgid "Embedded terminal"
+msgstr "Terminal embebida"
+
+#: ../data/menu.ui.h:13
+msgid "Highlighting mode..."
+msgstr "Modo de resaltado..."
+
+#: ../data/menu.ui.h:14
+msgid "Navigation"
+msgstr "Navegación"
+
+#: ../data/menu.ui.h:19
+msgid "Close all"
+msgstr "Cerrar todo"
+
+#: ../src/st-header-bar.vala:58
+msgid "Leave fullscreen mode"
+msgstr "Salir del modo a pantalla completa"
+
+#: ../src/st-preferences-dialog.vala:68
+msgid "Embeded terminal"
+msgstr "Terminal embebida"
+
+#: ../src/st-preferences-dialog.vala:180
+msgid "Workspace"
+msgstr "Espacio de trabajo"
+
+#: ../src/st-preferences-dialog.vala:185
+msgid "Save current workspace on closing"
+msgstr "Guardar el espacio de trabajo actual"
+
+#: ../src/st-tab-bar.vala:88 ../src/st-tab-bar.vala:213
+msgid "Hidden tabs: %d"
+msgstr "Pestañas ocultas: %d"
+
+#: ../src/st-preferences-dialog.vala:175
+msgid "Insert matching brackets"
+msgstr "Insertar parejas de corchetes"
+
+#: ../src/st-source-view.c:180
+msgid "Document words"
+msgstr "Palabras del documento"
+

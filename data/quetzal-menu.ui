@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <menu id="appmenu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Preferences</attribute>
+        <attribute name="action">app.prefs</attribute>
+        <attribute name="accel">&lt;Primary&gt;F1</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About</attribute>
+        <attribute name="action">app.about</attribute>
+        <attribute name="accel">F1</attribute>
+      </item>
+
+      <item>
+        <attribute name="label" translatable="yes">Quit</attribute>
+        <attribute name="action">app.quit</attribute>
+        <attribute name="accel">&lt;Primary&gt;q</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="window-menu">
+    <section>
+      <attribute name="id">juntion-section</attribute>
+      <attribute name="display-hint">horizontal-buttons</attribute>
+      <item>
+        <attribute name="label" translatable="yes">Reload</attribute>
+        <attribute name="action">win.reload</attribute>
+        <attribute name="verb-icon">view-refresh-symbolic</attribute>
+        <attribute name="accel">&lt;Primary&gt;r</attribute>
+      </item>
+
+      <item>
+	<attribute name="label" translatable="yes">Build</attribute>
+        <attribute name="action">win.build</attribute>
+        <attribute name="verb-icon">media-playback-start-symbolic</attribute>
+        <attribute name="accel">&lt;Primary&gt;b</attribute>
+      </item>
+
+      <item>
+        <attribute name="label" translatable="yes">Fullscreen</attribute>
+        <attribute name="action">win.fullscreen</attribute>
+        <attribute name="verb-icon">view-fullscreen-symbolic</attribute>
+        <attribute name="accel">F11</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Save as...</attribute>
+        <attribute name="action">win.save_as</attribute>
+        <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;s</attribute>
+      </item>
+
+      <item>
+        <attribute name="label" translatable="yes">Save all</attribute>
+        <attribute name="action">win.save_all</attribute>
+      </item>
+      </section>
+
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">Search...</attribute>
+          <attribute name="action">win.search_mode</attribute>
+          <attribute name="accel">&lt;Primary&gt;f</attribute>
+        </item>
+
+        <item>
+          <attribute name="label" translatable="yes">Search and replace</attribute>
+          <attribute name="action">win.search_nrep_mode</attribute>
+          <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;f</attribute>
+        </item>
+      </section>
+
+      <section>
+        <submenu>
+          <attribute name="label" translatable="yes">View</attribute>
+          <section>
+            <attribute name="id">view-section</attribute>
+
+            <item>
+              <attribute name="label" translatable="yes">Embedded terminal</attribute>
+              <attribute name="action">win.toggle_terminal</attribute>
+              <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;c</attribute>
+            </item>
+					</section>
+          <section>
+            <item>
+              <attribute name="label" translatable="yes">Highlighting mode...</attribute>
+              <attribute name="action">win.set_syntax</attribute>
+              <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;p</attribute>
+            </item>
+          </section>
+        </submenu>
+
+        <submenu>
+          <attribute name="label" translatable="yes">Navigation</attribute>
+          <section>
+            <attribute name="id">nav-section</attribute>
+		          <item>
+		            <attribute name="label" translatable="yes">Next tab</attribute>
+		            <attribute name="action">win.next_tab</attribute>
+		            <attribute name="accel">&lt;Primary&gt;Page_Down</attribute>
+		          </item>
+
+		          <item>
+		            <attribute name="label" translatable="yes">Previous tab</attribute>
+		            <attribute name="action">win.prev_tab</attribute>
+		            <attribute name="accel">&lt;Primary&gt;Page_Up</attribute>
+		          </item>
+          </section>
+
+					<section>
+		        <item>
+							<attribute name="label" translatable="yes">Reopen last tab</attribute>
+							<attribute name="action">win.re_open</attribute>
+							<attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;t</attribute>
+			    	</item>
+      		</section>
+        </submenu>
+      </section>
+
+      <section>
+		    <item>
+		      <attribute name="label" translatable="yes">Close current tab</attribute>
+		      <attribute name="action">win.close_tab</attribute>
+		      <attribute name="accel">&lt;Primary&gt;w</attribute>
+		    </item>
+
+		    <item>
+		      <attribute name="label" translatable="yes">Close all</attribute>
+		      <attribute name="action">win.close_all</attribute>
+		      <attribute name="accel">&lt;Primary&gt;&lt;Shift&gt;w</attribute>
+		    </item>
+		  </section>
+  </menu>
+</interface>
