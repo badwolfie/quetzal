@@ -1,4 +1,4 @@
-#include <glib/gi18n-lib.h>
+#include <glib/gi18n.h>
 #include "qt-application.h"
 
 struct _QtApplication

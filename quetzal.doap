@@ -27,12 +27,4 @@
     		<foaf:name>Ian Hernandez</foaf:name>
     	</foaf:Person>
     </maintainer>
-
-    <release>
-        <Version>
-            <foaf:name>Beta</foaf:name>
-            <created>2015-07-15</created>
-            <revision>0.11.1</revision>
-        </Version>
-    </release>
 </Project>

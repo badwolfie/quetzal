@@ -3,5 +3,4 @@
 [encoding: UTF-8]
 [type: gettext/glade]data/menu.ui
 data/simple-text.desktop.in
-
-
+src/qt-application.c
