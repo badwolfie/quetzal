@@ -7,21 +7,25 @@ resources.c: $(top_srcdir)/data/quetzal.gresource.xml $(shell $(GLIB_COMPILE_RES
 
 quetzal_SOURCES = \
 	qt-application.c qt-application.h \
-	main.c \
+	quetzal.c \
 	$(BUILT_SOURCES)
 
 quetzal_CPPFLAGS = \
 	-I$(top_srcdir) \
-	-DLOCALEDIR=\""$(localedir)"\" \
+	-DG_LOG_DOMAIN=\"QuetzalTextEditor\" \
+	-DDATADIR=\""$(pkgdatadir)"\" \
+	-DQTLOCALEDIR=\""$(datadir)/locale"\" \
+	$(DISABLE_DEPRECATED) \
 	$(AM_CPPFLAGS)
 
 quetzal_CFLAGS = \
-	$(quetzal_CFLAGS) \
+	$(QUETZAL_CFLAGS) \
+	$(WARN_CFLAGS) \
 	$(AM_CFLAGS)
 
 quetzal_LDFLAGS = \
 	$(AM_LDFLAGS)
 
 quetzal_LDADD = \
-	$(quetzal_LIBS) \
+	$(QUETZAL_LIBS) \
 	$(INTLLIBS)

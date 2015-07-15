@@ -18,20 +18,12 @@ AC_PROG_CC
 LT_PREREQ([2.2.6])
 LT_INIT
 
-# *****
-# GNOME
-# *****
-
-GNOME_COMPILE_WARNINGS([maximum])
-
 # ***************************
 # Check for required packages
 # ***************************
 
 pkg_modules="gtk+-3.0 >= 3.14 gtksourceview-3.0 >= 3.16.1 gee-0.8 >= 0.18.0 vte-2.91 >= 0.40.0"
-PKG_CHECK_MODULES(quetzal, [$pkg_modules])
-AC_SUBST(quetzal_CFLAGS)
-AC_SUBST(quetzal_LIBS)
+PKG_CHECK_MODULES(QUETZAL, [$pkg_modules])
 
 # *************
 # Documentation
@@ -49,7 +41,7 @@ IT_PROG_INTLTOOL([0.40.0])
 AC_SUBST([GETTEXT_PACKAGE], [quetzal])
 AC_DEFINE_UNQUOTED([GETTEXT_PACKAGE], "$GETTEXT_PACKAGE", [Define to the gettext package name.])
 # AM_GNU_GETTEXT_VERSION([0.11])
-# AM_GLIB_GNU_GETTEXT
+AM_GLIB_GNU_GETTEXT
 
 # *********
 # GSettings

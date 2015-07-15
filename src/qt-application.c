@@ -1,3 +1,4 @@
+#include "config.h"
 #include <glib/gi18n.h>
 #include "qt-application.h"
 
