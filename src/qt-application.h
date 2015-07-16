@@ -17,13 +17,4 @@ typedef struct _QtApplicationPrivate QtApplicationPrivate;
 GType qt_application_get_type (void);
 QtApplication * qt_application_new (void);
 
-static void qt_application_init (QtApplication * self);
-static void qt_application_class_init (QtApplicationClass * class);
-
-static void qt_application_startup (GApplication * self);
-static void qt_application_activate (GApplication * self);
-
-static void qt_about_activated (GSimpleAction * action, GVariant * parameter, gpointer app);
-static void qt_quit_activated (GSimpleAction * action, GVariant * parameter, gpointer app);
-
-#endif /* STAPPLICATION_H */
+#endif /* QTAPPLICATION_H */
