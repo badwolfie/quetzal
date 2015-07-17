@@ -82,7 +82,7 @@
     </key>
 
     <key type="b" name="prefer-dark">
-      <default>true</default>
+      <default>false</default>
       <summary>Prefer dark variant</summary>
       <description>Prefer dark variant for GTK+ theme</description>
     </key>
@@ -97,12 +97,6 @@
       <default>false</default>
       <summary>Insert matching braces</summary>
       <description>Whether or not should the editor insert the matching brace/bracket/parenthesis on writting</description>
-    </key>
-
-    <key type="b" name="show-welcome">
-      <default>true</default>
-      <summary>Show welcome screen</summary>
-      <description>Whether or not should the editor show the welcome screen on startup</description>
     </key>
   </schema>
 </schemalist>

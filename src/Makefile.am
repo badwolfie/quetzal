@@ -9,6 +9,9 @@ quetzal_SOURCES = \
 	qt-application.c qt-application.h \
 	qt-appwindow.c qt-appwindow.h \
 	qt-headerbar.c qt-headerbar.h \
+	qt-sourceview.c qt-sourceview.h \
+	qt-tabbar.c qt-tabbar.h \
+	qt-text-editor.c qt-text-editor.h \
 	quetzal.c \
 	$(BUILT_SOURCES)
 

@@ -19,6 +19,7 @@ struct _QtAppWindowClass
 
 struct _QtAppWindowPrivate 
 {
+	QtTextEditor * editor;
 	QtHeaderBar * header_bar;
 	QtHeaderBar * fs_header_bar;
 	GtkPaned * content;
@@ -34,6 +35,12 @@ qt_app_window_init (QtAppWindow * self)
 static void 
 qt_app_window_class_init (QtAppWindowClass * class) 
 {}
+
+QtTextEditor * 
+qt_appwindow_get_editor (QtAppWindow * self) 
+{
+	return self->priv->editor;
+}
 
 static void 
 qt_appwindow_create_widgets (QtAppWindow * self) 
@@ -149,7 +156,7 @@ qt_appwindow_connect_signals (QtAppWindow * self)
 }
 
 QtAppWindow * 
-qt_appwindow_new (QtApplication * app) 
+qt_appwindow_new (QtApplication * app, QtTextEditor * editor) 
 {
 	QtAppWindow * new_window;
 	new_window = QT_APP_WINDOW (
@@ -157,6 +164,7 @@ qt_appwindow_new (QtApplication * app)
 	);
 	
 	new_window->priv = qt_app_window_get_instance_private(new_window);
+	new_window->priv->editor = editor;
 	
 	g_object_set(GTK_WINDOW (new_window), 
 							 "window-position", 

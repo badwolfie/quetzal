@@ -1,3 +1,4 @@
+#include "qt-text-editor.h"
 #include "qt-application.h"
 #include "qt-appwindow.h"
 
@@ -93,6 +94,8 @@ static GActionEntry quetzal_app_entries[] = {
 static void 
 qt_application_startup (GApplication * self) 
 {
+	G_APPLICATION_CLASS (qt_application_parent_class)->startup(self);
+	
 	gchar * conf_dir_path = g_strconcat(g_get_home_dir(), 
 																		  "/.quetzal", 
 																		  NULL);
@@ -142,7 +145,6 @@ qt_application_startup (GApplication * self)
 	const gchar * about_accels[2] = { "F1", NULL };
 	const gchar * quit_accels[2] = { "<control>Q", NULL };
 
-	G_APPLICATION_CLASS (qt_application_parent_class)->startup(self);
 	g_action_map_add_action_entries (G_ACTION_MAP (self),
 																	 quetzal_app_entries,
 																	 G_N_ELEMENTS (quetzal_app_entries), 
@@ -163,11 +165,128 @@ qt_application_startup (GApplication * self)
 	QT_APPLICATION (self)->priv->settings = 
 		g_settings_new("com.github.badwolfie.simple-text");
 	
-	QT_APPLICATION (self)->priv->window = qt_appwindow_new(QT_APPLICATION (self));
+	QtTextEditor * editor = qt_text_editor_new();
+	
+	qt_text_editor_set_show_line_numbers(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"show-line-numbers"
+		)
+	);
+
+	qt_text_editor_set_show_right_margin(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"show-right-margin"
+		)
+	);
+
+	qt_text_editor_set_right_margin_at(editor, 
+		g_settings_get_int(
+			QT_APPLICATION (self)->priv->settings, 
+			"right-margin-at"
+		)
+	);
+
+	qt_text_editor_set_show_grid_pattern(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"show-grid-pattern"
+		)
+	);
+
+	qt_text_editor_set_highlight_current_line(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"highlight-current-line"
+		)
+	);
+
+	qt_text_editor_set_highlight_brackets(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"highlight-brackets"
+		)
+	);
+
+	qt_text_editor_set_use_text_wrap(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"use-text-wrap"
+		)
+	);
+
+	qt_text_editor_set_tab_width(editor, 
+		g_settings_get_int(
+			QT_APPLICATION (self)->priv->settings, 
+			"tab-width"
+		)
+	);
+
+	qt_text_editor_set_insert_spaces(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"insert-spaces"
+		)
+	);
+
+	qt_text_editor_set_auto_indent(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"auto-indent"
+		)
+	);
+
+	qt_text_editor_set_insert_braces(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"insert-braces"
+		)
+	);
+
+	qt_text_editor_set_save_workspace(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"save-workspace"
+		)
+	);
+
+	qt_text_editor_set_use_default_typo(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"use-default-typo"
+		)
+	);
+
+	qt_text_editor_set_editor_font(editor, 
+		g_settings_get_string(
+			QT_APPLICATION (self)->priv->settings, 
+			"editor-font"
+		)
+	);
+
+	qt_text_editor_set_color_scheme(editor, 
+		g_settings_get_string(
+			QT_APPLICATION (self)->priv->settings, 
+			"color-scheme"
+		)
+	);
+
+	qt_text_editor_set_prefer_dark(editor, 
+		g_settings_get_boolean(
+			QT_APPLICATION (self)->priv->settings, 
+			"prefer-dark"
+		)
+	);
+	
+	QT_APPLICATION (self)->priv->window = qt_appwindow_new(
+		QT_APPLICATION (self), editor
+	);
 	
 	GtkBuilder * builder = gtk_builder_new_from_resource(
 		"/com/github/badwolfie/quetzal/quetzal-menu.ui");
-	GMenuModel * app_menu = G_MENU_MODEL (gtk_builder_get_object(builder, "appmenu"));
+	GMenuModel * app_menu = G_MENU_MODEL (
+		gtk_builder_get_object(builder, "appmenu"));
 	gtk_application_set_app_menu(GTK_APPLICATION (self), app_menu);
 	g_object_unref(builder);
 	
@@ -255,11 +374,126 @@ qt_application_open (GApplication * self,
 }
 
 static void 
+qt_application_shutdown (GApplication * self) 
+{
+	G_APPLICATION_CLASS (qt_application_parent_class)->shutdown(self);
+	
+	QtTextEditor * editor = 
+		qt_appwindow_get_editor(QT_APPLICATION (self)->priv->window);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"show-line-numbers", 
+		qt_text_editor_get_show_line_numbers(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"show-right-margin", 
+		qt_text_editor_get_show_right_margin(editor)
+	);
+
+	g_settings_set_int(
+		QT_APPLICATION (self)->priv->settings, 
+		"right-margin-at", 
+		qt_text_editor_get_right_margin_at(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"show-grid-pattern", 
+		qt_text_editor_get_show_grid_pattern(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"highlight-current-line", 
+		qt_text_editor_get_highlight_current_line(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"highlight-brackets", 
+		qt_text_editor_get_highlight_brackets(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"use-text-wrap", 
+		qt_text_editor_get_use_text_wrap(editor)
+	);
+
+	g_settings_set_int(
+		QT_APPLICATION (self)->priv->settings, 
+		"tab-width", 
+		qt_text_editor_get_tab_width(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"insert-spaces", 
+		qt_text_editor_get_insert_spaces(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"auto-indent", 
+		qt_text_editor_get_auto_indent(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"insert-braces", 
+		qt_text_editor_get_insert_braces(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"save-workspace", 
+		qt_text_editor_get_save_workspace(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"use-default-typo", 
+		qt_text_editor_get_use_default_typo(editor)
+	);
+	
+	if (qt_text_editor_get_use_default_typo(editor)) {
+		g_settings_reset(
+			QT_APPLICATION (self)->priv->settings,
+			"editor-font"
+		);
+	} else {
+		g_settings_set_string(
+			QT_APPLICATION (self)->priv->settings, 
+			"editor-font", 
+			qt_text_editor_get_editor_font(editor)
+		);
+	}
+		
+	g_settings_set_string(
+		QT_APPLICATION (self)->priv->settings, 
+		"color-scheme", 
+		qt_text_editor_get_color_scheme(editor)
+	);
+
+	g_settings_set_boolean(
+		QT_APPLICATION (self)->priv->settings, 
+		"prefer-dark", 
+		qt_text_editor_get_prefer_dark(editor)
+	);
+	
+	g_object_unref(editor);
+}
+
+static void 
 qt_application_class_init (QtApplicationClass * class) 
 {
 	G_APPLICATION_CLASS (class)->startup = qt_application_startup;
 	G_APPLICATION_CLASS (class)->activate = qt_application_activate;
 	G_APPLICATION_CLASS (class)->open = qt_application_open;
+	G_APPLICATION_CLASS (class)->shutdown = qt_application_shutdown;
 }
 
 QtApplication * 
@@ -272,7 +506,7 @@ qt_application_new (void)
 		NULL
 	);
 
-	new_app->priv = qt_application_get_instance_private (new_app);
+	new_app->priv = qt_application_get_instance_private(new_app);
 	return new_app;
 }
 
