@@ -14,6 +14,12 @@ typedef struct _QtSourceViewClass QtSourceViewClass;
 typedef struct _QtSourceViewPrivate QtSourceViewPrivate;
 
 GType qt_source_view_get_type (void);
-QtSourceView * qt_source_view_new (QtTextEditor * editor, const gchar * filename);
+QtSourceView * qt_source_view_new (QtTextEditor * editor, GFile * file);
+
+const gchar * qt_source_view_get_language_name (QtSourceView * self);
+GtkSourceFile * qt_source_view_get_source_file (QtSourceView * self);
+GtkSourceBuffer * qt_source_view_get_source_buffer (QtSourceView * self);
+GtkSourceSearchSettings * qt_source_view_get_search_settings (QtSourceView * self);
+void qt_source_view_change_language (QtSourceView * self, const gchar * language);
 
 #endif /* QT_SOURCE_VIEW_H */

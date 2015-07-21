@@ -8,9 +8,10 @@ resources.c: $(top_srcdir)/data/quetzal.gresource.xml $(shell $(GLIB_COMPILE_RES
 quetzal_SOURCES = \
 	qt-application.c qt-application.h \
 	qt-appwindow.c qt-appwindow.h \
+	qt-documentbar.c qt-documentbar.h \
+	qt-document.c qt-document.h \
 	qt-headerbar.c qt-headerbar.h \
 	qt-sourceview.c qt-sourceview.h \
-	qt-tabbar.c qt-tabbar.h \
 	qt-text-editor.c qt-text-editor.h \
 	quetzal.c \
 	$(BUILT_SOURCES)

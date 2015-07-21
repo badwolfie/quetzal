@@ -347,7 +347,7 @@ qt_application_startup (GApplication * self)
 	
 	const gchar * accels_search[2] = { "<control>F", NULL };
 	gtk_application_set_accels_for_action(GTK_APPLICATION (self), 
-																				"win.search", 
+																				"win.search_mode", 
 																				accels_search);
 	system("clear");
 }

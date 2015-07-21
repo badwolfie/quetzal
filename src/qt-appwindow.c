@@ -1,5 +1,7 @@
 #include "qt-appwindow.h"
 #include "qt-headerbar.h"
+#include "qt-documentbar.h"
+#include "qt-document.h"
 
 #include "config.h"
 #include <glib/gi18n.h>
@@ -22,8 +24,20 @@ struct _QtAppWindowPrivate
 	QtTextEditor * editor;
 	QtHeaderBar * header_bar;
 	QtHeaderBar * fs_header_bar;
+	
 	GtkPaned * content;
-	VteTerminal * terminal;
+	GtkSearchBar * search_bar;
+	GtkSearchEntry * search_entry;
+	GtkButton * search_next;
+	GtkButton * search_prev;
+	
+	QtDocumentBar * doc_bar;
+	GtkStack * documents;
+	VteTerminal * terminal;	
+	
+	GtkSourceSearchContext * search_context;
+	const gchar * untitled;
+	gint counter;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (QtAppWindow, qt_app_window, GTK_TYPE_APPLICATION_WINDOW);
@@ -43,18 +57,100 @@ qt_appwindow_get_editor (QtAppWindow * self)
 }
 
 static void 
+qt_appwindow_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
+{
+	const gchar * doc_title = g_strdup_printf("tab - %d", self->priv->counter++);
+	
+}
+
+static void 
 qt_appwindow_create_widgets (QtAppWindow * self) 
 {
+	GtkSettings * gtk_settings = gtk_settings_get_default();
+	g_object_set(G_OBJECT (gtk_settings), 
+							 "gtk-application-prefer-dark-theme", 
+							 qt_text_editor_get_prefer_dark(self->priv->editor), 
+							 NULL);
+	
 	self->priv->header_bar = qt_header_bar_new(self);
 	self->priv->fs_header_bar = qt_header_bar_new(self);
 	gtk_widget_show(GTK_WIDGET (self->priv->header_bar));
 	gtk_window_set_titlebar(GTK_WINDOW (self), 
 												  GTK_WIDGET (self->priv->header_bar));
+
+	self->priv->search_entry = GTK_SEARCH_ENTRY (gtk_search_entry_new());
+	gtk_entry_set_placeholder_text(GTK_ENTRY (self->priv->search_entry), 
+																 _ ("Enter your search..."));
+	gtk_entry_set_width_chars(GTK_ENTRY (self->priv->search_entry), 60);
+	/* conectar señales */
+	gtk_widget_show(GTK_WIDGET (self->priv->search_entry));
 	
+	self->priv->search_next = GTK_BUTTON (
+		gtk_button_new_from_icon_name("go-down-symbolic", GTK_ICON_SIZE_MENU));
+	/* conectar señal */
+	gtk_widget_show(GTK_WIDGET (self->priv->search_next));
+	
+	self->priv->search_prev = GTK_BUTTON (
+		gtk_button_new_from_icon_name("go-up-symbolic", GTK_ICON_SIZE_MENU));
+	/* conectar señal */
+	gtk_widget_show(GTK_WIDGET (self->priv->search_prev));
+	
+	GtkBox * hbox = GTK_BOX (gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5));
+	gtk_box_pack_start(hbox, GTK_WIDGET (self->priv->search_entry), 
+										 FALSE, FALSE, 0);
+	gtk_box_pack_start(hbox, GTK_WIDGET (self->priv->search_prev), 
+										 FALSE, FALSE, 0);
+	gtk_box_pack_start(hbox, GTK_WIDGET (self->priv->search_next), 
+										 FALSE, FALSE, 0);
+	gtk_widget_show(GTK_WIDGET (hbox));
+	
+	self->priv->search_bar = GTK_SEARCH_BAR (gtk_search_bar_new());
+	gtk_search_bar_connect_entry(self->priv->search_bar, 
+															 GTK_ENTRY (self->priv->search_entry));
+	gtk_container_add(GTK_CONTAINER (self->priv->search_bar), GTK_WIDGET (hbox));
+	gtk_widget_show(GTK_WIDGET (self->priv->search_bar));
+		
+	self->priv->documents = GTK_STACK (gtk_stack_new());
+	gtk_stack_set_transition_type(self->priv->documents, 
+															  GTK_STACK_TRANSITION_TYPE_OVER_LEFT_RIGHT);
+	gtk_stack_set_transition_duration(self->priv->documents, 250);
+	gtk_widget_show(GTK_WIDGET (self->priv->documents));
+	
+	/* BORRAR ESTA PARTE */
+	QtSourceView * current_doc = qt_source_view_new(self->priv->editor, NULL);
+	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (current_doc), "algo");
+	gtk_widget_show(GTK_WIDGET (current_doc));
+
+	self->priv->doc_bar = qt_document_bar_new();
+	qt_document_bar_set_stack(self->priv->doc_bar, self->priv->documents);
+	/* conectar señales */
+	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));
+	
+	/* statusbar */
+	
+	GtkSeparator * separator = 
+		GTK_SEPARATOR (gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
+		
 	GtkBox * vbox = GTK_BOX (gtk_box_new(GTK_ORIENTATION_VERTICAL, 0));
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->fs_header_bar),
 										 FALSE, TRUE, 0);
+	gtk_box_pack_start(vbox, 
+										 GTK_WIDGET (self->priv->search_bar), 
+										 FALSE, TRUE, 0);
+	gtk_box_pack_start(vbox, 
+										 GTK_WIDGET (self->priv->doc_bar),
+										 FALSE, TRUE, 5);
+	gtk_box_pack_start(vbox, 
+										 GTK_WIDGET (separator),
+										 FALSE, TRUE, 0);
+	gtk_box_pack_start(vbox, 
+										 GTK_WIDGET (self->priv->documents),
+										 TRUE, TRUE, 0);
+	/* statusbar
+	 * gtk_box_pack_start(vbox, 
+										 GTK_WIDGET (self->priv->), 
+										 FALSE, TRUE, 0); */
 	g_object_set (GTK_WIDGET (vbox), "height-request", 400, NULL);
 	gtk_widget_show(GTK_WIDGET (vbox));
 	
@@ -67,6 +163,48 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 	
 	gtk_widget_show(GTK_WIDGET (self->priv->content));
 	gtk_container_add(GTK_CONTAINER (self), GTK_WIDGET (self->priv->content));
+}
+
+static void 
+qt_appwindow_on_toggle_search_cb (GSimpleAction * sender, 
+																	GVariant * parameter, 
+																	gpointer data) 
+{
+	QtAppWindow * self = QT_APP_WINDOW (data);
+	gboolean search_mode_enabled;
+	g_object_get(G_OBJECT (self->priv->search_bar), 
+							 "search-mode-enabled", &search_mode_enabled,
+							 NULL);
+	
+	if (!search_mode_enabled)
+	 {
+		g_object_set(
+			G_OBJECT (self->priv->search_bar), 
+			"search-mode-enabled", TRUE, 
+			NULL
+		);
+		
+		/* Cambiar funcionalidad por la correcta */
+		QtSourceView * current_doc = QT_SOURCE_VIEW (
+			gtk_stack_get_visible_child(self->priv->documents)
+		);
+		
+		self->priv->search_context = GTK_SOURCE_SEARCH_CONTEXT (
+			gtk_source_search_context_new(
+				qt_source_view_get_source_buffer(current_doc), 
+				qt_source_view_get_search_settings(current_doc)
+			)
+		);
+		
+		gtk_source_search_context_set_highlight(self->priv->search_context, TRUE);
+	} else 
+	 {
+		g_object_set(
+			G_OBJECT (self->priv->search_bar), 
+			"search-mode-enabled", FALSE, 
+			NULL
+		);
+	}
 }
 
 static void 
@@ -153,6 +291,14 @@ qt_appwindow_connect_signals (QtAppWindow * self)
 									  G_CALLBACK (qt_appwindow_on_show_terminal_cb), 
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_show_terminal));
+	
+	GSimpleAction * action_toggle_search = g_simple_action_new(
+		"search_mode", NULL);
+	g_signal_connect (action_toggle_search, 
+									  "activate", 
+									  G_CALLBACK (qt_appwindow_on_toggle_search_cb),
+									  self);
+	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_toggle_search));
 }
 
 QtAppWindow * 
@@ -165,6 +311,9 @@ qt_appwindow_new (QtApplication * app, QtTextEditor * editor)
 	
 	new_window->priv = qt_app_window_get_instance_private(new_window);
 	new_window->priv->editor = editor;
+	
+	new_window->priv->untitled = _ ("Untitled file");
+	new_window->priv->counter = 0;
 	
 	g_object_set(GTK_WINDOW (new_window), 
 							 "window-position", 
