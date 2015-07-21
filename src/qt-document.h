@@ -16,6 +16,7 @@ typedef struct _QtDocumentPrivate QtDocumentPrivate;
 GType qt_document_get_type (void);
 QtDocument * qt_document_new (QtTextEditor * editor, GFile * file);
 
+const gchar * qt_document_get_doc_path (QtDocument * self);
 const gchar * qt_document_get_doc_title (QtDocument * self);
 void qt_document_set_doc_title (QtDocument * self, const gchar * value);
 

@@ -78,16 +78,25 @@ qt_document_bar_set_stack (QtDocumentBar * self, GtkStack * stack)
 void 
 qt_document_bar_add_doc (QtDocumentBar * self, QtDocument * doc) 
 {
-	
+	if (self->priv->doc_num < 5) {
+		if (self->priv->doc_extra_num == 0) 
+			gtk_widget_hide(GTK_WIDGET (self->priv->extra_menu));
+		
+		gtk_box_pack_start(GTK_BOX (self), GTK_WIDGET (doc), TRUE, TRUE, 5);
+		/* append doc */
+		self->priv->doc_num++;
+	} else {
+		gtk_widget_show(GTK_WIDGET (self->priv->extra_menu));
+		gtk_box_pack_start(GTK_BOX (self->priv->extra_box), 
+										   GTK_WIDGET (doc), 
+										   FALSE, TRUE, 7);
+		self->priv->doc_extra_num++;
+	}
 } 
 
 static void 
 qt_document_bar_init (QtDocumentBar * self) 
-{
-	g_printf("Inicializando docbar\n");
-	self->priv = qt_document_bar_get_instance_private(self);
-	qt_document_bar_create_widgets(self);
-}
+{}
 
 static void 
 qt_document_bar_class_init (QtDocumentBarClass * class) 
@@ -98,10 +107,15 @@ qt_document_bar_class_init (QtDocumentBarClass * class)
 QtDocumentBar * 
 qt_document_bar_new (void) 
 {
-	return g_object_new (QT_DOCUMENT_BAR_TYPE, 
+	QtDocumentBar * new_doc_bar = g_object_new (QT_DOCUMENT_BAR_TYPE, 
 		"orientation", GTK_ORIENTATION_HORIZONTAL,
 		"spacing", 0, 
 		NULL
 	);
+	
+	new_doc_bar->priv = qt_document_bar_get_instance_private(new_doc_bar);
+	qt_document_bar_create_widgets(new_doc_bar);
+	
+	return new_doc_bar;
 }
 

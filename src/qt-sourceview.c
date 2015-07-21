@@ -94,6 +94,54 @@ static const GtkTargetEntry target_list[1] = {
 };
 
 static void 
+qt_source_view_load_file_ready (GObject * sender, 
+																GAsyncResult * result, 
+																gpointer data) 
+{
+	QtSourceView * self = QT_SOURCE_VIEW (data);
+	GFile * file = gtk_source_file_get_location(self->priv->source_file);
+	GtkSourceBuffer * buffer = 
+		GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
+	
+	GError * inner_error = NULL;
+	gboolean file_loaded = 
+		gtk_source_file_loader_load_finish(self->priv->file_loader,
+																		   result, &inner_error);
+	if (inner_error != NULL) {
+		g_error("gtk_source_file_loader_load_finish error: %s", 
+				    inner_error->message);
+		g_error_free(inner_error);
+	}
+	
+	if (file_loaded) {
+		gboolean result_uncertain;
+		gchar * filename = g_file_get_path(file);
+	
+		const gchar * file_text;
+		g_object_get(G_OBJECT (buffer), 
+							   "text", &file_text, 
+							   NULL);
+	
+		gchar * content_type = g_content_type_guess(
+			filename, (const guchar *) file_text, 0, &result_uncertain
+		);
+	
+		
+		if (result_uncertain) content_type = NULL;
+	
+		GtkSourceLanguageManager * language_manager = 
+			gtk_source_language_manager_get_default();
+		GtkSourceLanguage * language = gtk_source_language_manager_guess_language(
+			language_manager, filename, content_type
+		);
+	
+		gtk_source_buffer_set_language(buffer, language);
+		gtk_text_buffer_set_modified(GTK_TEXT_BUFFER (buffer), FALSE);
+		g_signal_emit_by_name(self, "file-loaded");
+	}
+}
+
+static void 
 qt_source_view_load_file (QtSourceView * self) 
 {
 	GFile * file = gtk_source_file_get_location(self->priv->source_file);
@@ -101,93 +149,42 @@ qt_source_view_load_file (QtSourceView * self)
 	if (file != NULL) {
 		GtkSourceBuffer * buffer = 
 			GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
+	 
 		self->priv->file_loader = 
 			gtk_source_file_loader_new(buffer, self->priv->source_file);
 		
-		gtk_source_file_loader_load_async(self->priv->file_loader,
-																		  G_PRIORITY_HIGH, NULL, 
-																		  NULL, NULL, NULL, 
-																		  NULL, NULL);
-		
-		GError * inner_error = NULL;
-		gboolean file_loaded = 
-			gtk_source_file_loader_load_finish(self->priv->file_loader,
-																			   NULL, &inner_error);
-		if (inner_error != NULL) {
-			g_error("gtk_source_file_loader_load_finish error: %s", 
-					    inner_error->message);
-			g_error_free(inner_error);
-		}
-		
-		if (file_loaded) {
-			gboolean result_uncertain;
-			gchar * filename = g_file_get_path(file);
-		
-			const gchar * file_text;
-			g_object_get(G_OBJECT (buffer), 
-								   "text", &file_text, 
-								   NULL);
-		
-			gchar * content_type = g_content_type_guess(
-				filename, (const guchar *) file_text, 0, &result_uncertain
-			);
-		
-			if (result_uncertain) content_type = NULL;
-		
-			GtkSourceLanguageManager * language_manager = 
-				gtk_source_language_manager_get_default();
-			GtkSourceLanguage * language = gtk_source_language_manager_guess_language(
-				language_manager, filename, content_type
-			);
-		
-			gtk_source_buffer_set_language(buffer, language);
-			gtk_text_buffer_set_modified(GTK_TEXT_BUFFER (buffer), FALSE);
-			g_signal_emit_by_name(self, "file-loaded");
-		}
+		gtk_source_file_loader_load_async(
+			self->priv->file_loader,
+			G_PRIORITY_HIGH, NULL, 
+			NULL, NULL, NULL, 
+			qt_source_view_load_file_ready, self
+		);
 	}
 }
 
 static void 
-qt_source_view_save_file (QtSourceView * self, GFile * target_file) 
+qt_source_view_save_file_ready (GObject * sender, 
+																GAsyncResult * result, 
+																gpointer data) 
 {
-	if (target_file != NULL) {
-		gtk_source_file_set_location(self->priv->source_file, target_file);
-		
-		GError * inner_error;
-		if (!g_file_query_exists(target_file, NULL)) {
-			g_file_create(target_file, G_FILE_CREATE_NONE, NULL, &inner_error);
-			if (inner_error != NULL) {
-				g_error("g_file_create: I/O error: %s", inner_error->message);
-				g_error_free(inner_error);
-			}
-		}
-														
-		gboolean result_uncertain;
-		gchar * content_type;
-	}
-	
+	QtSourceView * self = QT_SOURCE_VIEW (data);
+	GFile * file = gtk_source_file_get_location(self->priv->source_file);
 	GtkSourceBuffer * buffer = 
-			GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
-	self->priv->file_saver = 
-		gtk_source_file_saver_new(buffer, self->priv->source_file);
-	gtk_source_file_saver_save_async(self->priv->file_saver, 
-																	 G_PRIORITY_HIGH, NULL, 
-																	 NULL, NULL, NULL, 
-																	 NULL, NULL);
+		GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
 	
 	GError * inner_error;
 	gboolean file_saved = 
 		gtk_source_file_saver_save_finish(self->priv->file_saver, 
 																		  NULL, &inner_error);
 	if (inner_error != NULL) {
-			g_error("gtk_source_file_saver_save_finish error: %s", 
-					    inner_error->message);
-			g_error_free(inner_error);
-		}
+		g_error("gtk_source_file_saver_save_finish error: %s", 
+				    inner_error->message);
+		g_error_free(inner_error);
+	}
 	
 	if (file_saved) {
 		gboolean result_uncertain;
-		gchar * filename = g_file_get_path(target_file);
+		gchar * filename = g_file_get_path(file);
 	
 		const gchar * file_text;
 		g_object_get(G_OBJECT (buffer), 
@@ -210,6 +207,36 @@ qt_source_view_save_file (QtSourceView * self, GFile * target_file)
 		gtk_text_buffer_set_modified(GTK_TEXT_BUFFER (buffer), FALSE);
 		g_signal_emit_by_name(self, "file-saved");
 	}
+}
+
+static void 
+qt_source_view_save_file (QtSourceView * self, GFile * target_file) 
+{
+	if (target_file != NULL) {
+		gtk_source_file_set_location(self->priv->source_file, target_file);
+		
+		GError * inner_error;
+		if (!g_file_query_exists(target_file, NULL)) {
+			g_file_create(target_file, G_FILE_CREATE_NONE, NULL, &inner_error);
+			if (inner_error != NULL) {
+				g_error("g_file_create: I/O error: %s", inner_error->message);
+				g_error_free(inner_error);
+			}
+		}
+	}
+	
+	GtkSourceBuffer * buffer = 
+			GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
+	
+	self->priv->file_saver = 
+		gtk_source_file_saver_new(buffer, self->priv->source_file);
+	
+	gtk_source_file_saver_save_async(
+		self->priv->file_saver, 
+		G_PRIORITY_HIGH, NULL, 
+		NULL, NULL, NULL, 
+		qt_source_view_save_file_ready, self
+	);
 }
 
 static void 
@@ -328,6 +355,36 @@ qt_source_view_on_drag_data_received (GtkWidget * sender,
 }
 
 static void 
+qt_source_view_set_font (QtSourceView * self, const gchar * font_description) 
+{
+	GError * inner_error;
+	GtkCssProvider * css_provider = gtk_css_provider_new();
+	const gchar * css_data = g_strconcat(
+		"GtkSourceView { font: ", 
+		font_description, 
+		"; }", 
+		NULL
+	);
+	
+	gtk_css_provider_load_from_data(css_provider, css_data, -1, &inner_error);
+	
+	if (inner_error != NULL) {
+		g_error("gtk_css_provider_load_from_data error: %s\n", 
+					  inner_error->message);
+		g_error_free(inner_error);
+	}
+	
+	GtkStyleContext * style_context = 
+		gtk_widget_get_style_context(GTK_WIDGET (self));
+	
+	gtk_style_context_add_provider(
+		style_context, 
+		GTK_STYLE_PROVIDER (css_provider), 
+		GTK_STYLE_PROVIDER_PRIORITY_SETTINGS
+	);
+}
+
+static void 
 qt_source_view_set_properties (QtSourceView * self) 
 {
 	QtTextEditor * editor = self->priv->editor;
@@ -368,7 +425,7 @@ qt_source_view_set_properties (QtSourceView * self)
 		qt_text_editor_get_auto_indent(editor)
 	);
 	
-	/* override_font */
+	qt_source_view_set_font(self, qt_text_editor_get_editor_font(editor));
 	
 	if (qt_text_editor_get_show_grid_pattern(editor)) {
 		gtk_source_view_set_background_pattern(

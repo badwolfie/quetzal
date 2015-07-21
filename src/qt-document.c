@@ -32,9 +32,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (QtDocument, qt_document, GTK_TYPE_BOX);
 
 static void 
 qt_document_init (QtDocument * self) 
-{
-	self->priv->untitled = _ ("Untitled file");
-}
+{}
 
 static void 
 qt_document_on_drag_n_drop (QtSourceView * sender, 
@@ -72,6 +70,15 @@ void
 qt_document_change_language (QtDocument * self, const gchar * language) 
 {
 	qt_source_view_change_language(self->priv->doc_view, language);
+}
+
+const gchar * 
+qt_document_get_doc_path (QtDocument * self) 
+{
+	GtkSourceFile * source_file = 
+		qt_source_view_get_source_file(self->priv->doc_view);
+	GFile * file = gtk_source_file_get_location(source_file);
+	return g_file_get_path(file);
 }
 
 const gchar * 
@@ -214,10 +221,14 @@ qt_document_new (QtTextEditor * editor, GFile * file)
 	QtDocument * new_document;
 	new_document = g_object_new (
 		QT_DOCUMENT_TYPE, 
+		"orientation", GTK_ORIENTATION_HORIZONTAL, 
+		"spacing", 0, 
 		NULL
 	);
 	
+	if (new_document != NULL) puts("qt_document created");
 	new_document->priv = qt_document_get_instance_private(new_document);
+	new_document->priv->untitled = _ ("Untitled file");
 	new_document->priv->editor = editor;
 	
 	if (file != NULL) {

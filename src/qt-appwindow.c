@@ -59,8 +59,24 @@ qt_appwindow_get_editor (QtAppWindow * self)
 static void 
 qt_appwindow_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
 {
-	const gchar * doc_title = g_strdup_printf("tab - %d", self->priv->counter++);
+	const gchar * doc_name = g_strdup_printf("tab - %d", self->priv->counter++);
+	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (new_doc), doc_name);
+	qt_document_bar_add_doc(self->priv->doc_bar, new_doc);
 	
+	const gchar * header_title = qt_document_get_doc_path(new_doc);
+	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->fs_header_bar), 
+													 header_title);
+	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->header_bar), 
+													 header_title);
+}
+
+void 
+qt_appwindow_create_new_doc (GObject * sender, gpointer data) 
+{
+	QtAppWindow * self = QT_APP_WINDOW (data);
+	QtDocument * doc = qt_document_new(self->priv->editor, NULL);
+	if (doc != NULL) puts ("doc not null");
+	qt_appwindow_add_new_doc(self, doc);
 }
 
 static void 
@@ -117,9 +133,15 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 	gtk_widget_show(GTK_WIDGET (self->priv->documents));
 	
 	/* BORRAR ESTA PARTE */
-	QtSourceView * current_doc = qt_source_view_new(self->priv->editor, NULL);
-	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (current_doc), "algo");
+	GtkScrolledWindow * scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new(NULL, NULL));
+	
+	GFile * file = g_file_new_for_path("/home/iann/Proyectos/Simple Text Editor/src/st-application.c");
+	puts(g_file_get_basename(file));
+	QtSourceView * current_doc = qt_source_view_new(self->priv->editor, file);
+	gtk_container_add(GTK_CONTAINER (scroll), GTK_WIDGET (current_doc));
+	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (scroll), "algo");
 	gtk_widget_show(GTK_WIDGET (current_doc));
+	gtk_widget_show(GTK_WIDGET (scroll));
 
 	self->priv->doc_bar = qt_document_bar_new();
 	qt_document_bar_set_stack(self->priv->doc_bar, self->priv->documents);

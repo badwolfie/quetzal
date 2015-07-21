@@ -16,5 +16,7 @@ GType qt_app_window_get_type (void);
 QtAppWindow * qt_appwindow_new (QtApplication * app, QtTextEditor * editor);
 
 QtTextEditor * qt_appwindow_get_editor (QtAppWindow * self);
+void qt_appwindow_create_new_doc (GObject * sender, gpointer data);
+
 
 #endif /* QTAPPWINDOW_H */

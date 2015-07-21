@@ -121,7 +121,9 @@ qt_header_bar_toggle_fullscreen (QtHeaderBar * self)
 static void 
 qt_header_bar_connect_signals (QtHeaderBar * self) 
 {
-	
+	g_signal_connect (G_OBJECT (self->priv->new_tab_button), 
+									  "clicked", G_CALLBACK (qt_appwindow_create_new_doc), 
+									  self->priv->window);
 }
 
 QtHeaderBar * 
