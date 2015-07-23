@@ -128,6 +128,25 @@ hr {
 	z-index: 2;
 }
 
+#profile-pic-wrapper {
+	position: absolute;
+	background-color: #27B893;
+	bottom: -70px;
+	right: 30px;
+	border-radius: 100%;
+	width: 134px;
+	height: 134px;
+	box-shadow: rgba(0, 0, 0, 0.3) 3px 3px 5px 0px;
+	z-index: 2;
+}
+
+.profile-pic {
+	border-radius: 100%;
+	margin: 3px 3px 3px 3px;
+	width: 128px;
+	height: 128px;
+}
+
 #download {
 	width: 25px;
 	height: 25px;
