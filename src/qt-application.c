@@ -60,18 +60,18 @@ qt_about_activated (GSimpleAction * action,
 	about_dialog = GTK_ABOUT_DIALOG (gtk_about_dialog_new());
 	gtk_window_set_transient_for(GTK_WINDOW (about_dialog), 
 															 GTK_WINDOW (QT_APPLICATION (app)->priv->window));
-	gtk_about_dialog_set_program_name(about_dialog, APP_NAME);
-	gtk_about_dialog_set_comments (about_dialog, APP_SHORTDESC);
-	gtk_about_dialog_set_authors (about_dialog, author);
-	gtk_about_dialog_add_credit_section (about_dialog, _ ("Contributors"), contrib);
-	// gtk_about_dialog_set_logo_icon_name (about_dialog, "quetzal");
-	gtk_about_dialog_set_license (about_dialog, license);
-	gtk_about_dialog_set_version (about_dialog, APP_VERSION);
-	gtk_about_dialog_set_website (about_dialog, 
-		"https://github.com/badwolfie/quetzal");
-	gtk_about_dialog_set_website_label (about_dialog, _ ("Web page"));
-	gtk_about_dialog_set_copyright (about_dialog, 
-		"Copyright \xc2\xa9 2015 Ian Hernández");
+  g_object_set(G_OBJECT (about_dialog),
+               "program-name", APP_NAME,
+               "comments", APP_SHORTDESC,
+               "authors", author, 
+               "artists", author,
+               // "logo-icon-name", "quetzal",
+               "license", license,
+               "version", APP_VERSION,
+               "website", "http://badwolfie.github.io/quetzal",
+               "website-label", _ ("Web page"),
+               "copyright", "Copyright \xc2\xa9 2015 Ian Hernández",
+               NULL);
 	
 	gtk_dialog_run ((GtkDialog *) about_dialog);
 	gtk_widget_destroy ((GtkWidget *) about_dialog);

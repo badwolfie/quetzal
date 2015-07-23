@@ -1,64 +1,58 @@
 # Quetzal - Text Editor (beta)
 
-Quetzal is a text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features.
-
-It's currently available as an AUR package for ArchLinux and we are working to port it to other Linux distributions such as Debian and Fedora.
-
-Check the [releases page](https://github.com/badwolfie/quetzal/releases) for installation options.  
-
-![About](screenshots/about.png)
+Quetzal is an open source text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features. It's the rebranding of an [old project](https://github.com/badwolfie/simple-text) of mine.
 
 ## Installation
 
 Dependencies (package names may vary depending on your distribution):
-* gtk3 >= 3.16
-* gtksourceview3
-* libgee >= 0.8
-* vte3
 * dconf
-* intltool
+* glib-2.0 >= 2.44
+* gtk+-3.0 >= 3.14
+* gtksourceview-3.0 (>= 3.16 for background patterns)
+* intltool >= 0.40
+* libgee-0.8
+* make (for project building)
+* vte-2.91 >= 0.40
+* autoconf (makedep)
+* automake (makedep)
+* git (makedep, not necessary if you downloaded the tarball)
 
-Also, the GNU autotools (autoconf, automake, ...)  
-Then, simply:
+Then, simply do:
 ```
 	$ git clone https://github.com/badwolfie/quetzal.git
 	$ cd quetzal
-	$ ./autogen.sh
-	$ ./configure
+	$ ./autogen.sh --prefix=/usr
 	$ make
 	# make install
 ```
 
-## Screenshots
-#### Main view
-![Main view](screenshots/main-view.png)
+Or check the [releases page](https://github.com/badwolfie/quetzal/releases) for distribution-based installation options. 
 
-#### Tab support
-![Tab support](screenshots/tab-support.png)
-
-#### Syntax setting
-![Syntax setting](screenshots/syntax-setting.png)
-
-#### Syntax highlighting
-![Syntax highlighting](screenshots/syntax-highlighting.png)
-
-#### Embeded terminal
-![Embeded terminal](screenshots/embeded-terminal.png)
-
-#### Edit preferences
-![Edit preferences](screenshots/editing-prefs.png)
-
-#### Text searching
-![Text searching](screenshots/searching.png)
-
-#### Color schemes
-![Color schemes](screenshots/color-schemes.png)
-
-#### Dark theme variant
-![Dark theme variant](screenshots/dark-variant.png)
+## Shortcuts
+| Key | Action |
+|:---:|:---|
+| Ctrl + B | Build project (You need to create a Makefile in the directory before using this feature) |
+| Ctrl + Shift + C | Toggle embeded terminal |
+| Ctrl + F | Toggle searching mode |
+| Ctrl + N | Open a new file |
+| Ctrl + O | Open a file |
+| Ctrl + PageDown | Switch to next file |
+| Ctrl + PageUp | Switch to previous file |
+| Ctrl + Shift + P | Set syntax highlighting mode |
+| Ctrl + Q | Quit application |
+| Ctrl + R | Reload current file |
+| Ctrl + S | Save current file |
+| Ctrl + Shift + S | Save current file as... |
+| Ctrl + Shift + T | Re-open last closed file |
+| Ctrl + W | Close current file |
+| Ctrl + Shift + W | Close all files |
+| Ctrl + Z | Undo last step |
+| Ctrl + Shift + Z | Redo last step |
+| F1 | Open about window |
+| Ctrl + F1 | Open preferences window |
+| F10 | Open popover menu |
+| F11 | Toggle fullscreen mode |
 
 ---
-
-To report an issue or request a feature go to the [issues page](https://github.com/badwolfie/quetzal/issues) or contact me on my [e-mail](mailto:ihernandezs@openmailbox.org).
 
 *Hope you really enjoy this project :)*
