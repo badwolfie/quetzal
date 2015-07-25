@@ -4,23 +4,17 @@
          xmlns="http://usefulinc.com/ns/doap#">
     <name xml:lang="en">Quetzal Web Page</name>
     <shortdesc xml:lang="en">A simple and lightweight text and code editor.</shortdesc>
-    <description>Quetzal is a text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features.
-    It features everything you would expect of a text editor, with some aditions such as color styling your code, drag n' drop support, syntax highlightning for all of the programming languages supported by GtkSourceView, a tab system implemented by myself using a GTKStack to show the current document and store all the opened ones and a very early stage build system that uses Make.
-
-    Some features that are planed but haven't been implemented are Code completion for C/C++ and a minimap.
+    <description>Official web page for the Quetzal Text editor, hosted by GitHub.
 
     The source code for Quetzal is available for anyone who whishes to build its package and try it. If your interested in building Quetzal from source simply download it and use the building script we provide at:
 
     	https://github.com/badwolfie/quetzal
-
-    Apart from being able to build Quetzal from the source code it's currently available as an AUR package for ArchLinux and we are working to port it to other Linux distributions such as Debian and Fedora.</description>
+    </description>
     <homepage rdf:resource="https://github.com/badwolfie/quetzal" />
-    <download-page rdf:resource="https://github.com/BadWolfie/quetzal/releases" />
-    <bug-database rdf:resource="https://github.com/BadWolfie/quetzal/issues" />
-    <screenshots rdf:resource="https://github.com/BadWolfie/quetzal/tree/master/screenshots" />
     <license rdf:resource="http://spdx.org/licenses/GPL-2.0+" />
 
-    <programming-language>C</programming-language>
+    <programming-language>HTML</programming-language>
+    <programming-language>CSS</programming-language>
 
     <maintainer>
     	<foaf:Person>
