@@ -13,7 +13,7 @@ quetzal_SOURCES = \
 	qt-headerbar.c qt-headerbar.h \
 	qt-sourceview.c qt-sourceview.h \
 	qt-text-editor.c qt-text-editor.h \
-	quetzal.c \
+	quetzal.c quetzal.h \
 	$(BUILT_SOURCES)
 
 quetzal_CPPFLAGS = \

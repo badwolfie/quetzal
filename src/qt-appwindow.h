@@ -17,6 +17,6 @@ QtAppWindow * qt_app_window_new (QtApplication * app, QtTextEditor * editor);
 
 QtTextEditor * qt_app_window_get_editor (QtAppWindow * self);
 void qt_app_window_create_new_doc (GObject * sender, gpointer data);
-
+void qt_app_window_open_file (GObject * sender, gpointer data);
 
 #endif /* QTAPPWINDOW_H */

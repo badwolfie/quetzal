@@ -168,12 +168,15 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 									  GTK_WIDGET (self->priv->doc_view));
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_scroll));
 	
+	GtkBox * hbox = GTK_BOX (gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+  gtk_widget_show(GTK_WIDGET (hbox));
+  gtk_widget_show_all(GTK_WIDGET (self));
+  
 	self->priv->doc_is_modified = 
 		GTK_LABEL (gtk_label_new("<b> \xe2\x80\xa2</b>"));
 	gtk_label_set_use_markup(self->priv->doc_is_modified, TRUE);
 	gtk_widget_hide(GTK_WIDGET (self->priv->doc_is_modified));
 	
-	GtkBox * hbox = GTK_BOX (gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 	gtk_box_pack_start(hbox, GTK_WIDGET (self->priv->title_label), 
 										 FALSE, TRUE, 0);
 	gtk_box_pack_start(hbox, GTK_WIDGET (self->priv->doc_is_modified), 

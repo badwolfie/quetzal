@@ -1,9 +1,9 @@
 [Desktop Entry]
-_Name=Simple Text
+_Name=Quetzal Text Editor
 _GenericName=Text Editor
-_Comment=A not so simple text and code editor written in Vala
+_Comment=A simple and lightweight text and code editor
 _Keywords=text;editor;development;programming;
-Exec=simple-text %U
+Exec=quetzal %U
 Terminal=false
 StartupNotify=true
 MimeType=text/plain;

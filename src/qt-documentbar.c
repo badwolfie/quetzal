@@ -1,6 +1,19 @@
 #include "qt-documentbar.h"
 #include "qt-document.h"
-#include <glib/gprintf.h>
+
+#include "config.h"
+#include <glib/gi18n.h>
+#include <stdlib.h>
+
+typedef struct _GTimeoutArgs GTimeoutArgs;
+
+struct _GTimeoutArgs 
+{
+  QtDocumentBar * self;
+  gint label_timeout;
+  gboolean open_doc;
+};
+
 struct _QtDocumentBar 
 {
 	GtkBox parent;
@@ -28,6 +41,18 @@ struct _QtDocumentBarPrivate
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (QtDocumentBar, qt_document_bar, GTK_TYPE_BOX);
+
+GList * 
+qt_document_bar_get_doc_list (QtDocumentBar * self) 
+{
+  return gtk_container_get_children(GTK_CONTAINER (self));
+}
+
+GList * 
+qt_document_bar_get_extra_doc_list (QtDocumentBar * self) 
+{
+  return gtk_container_get_children(GTK_CONTAINER (self->priv->extra_box));
+}
 
 static void 
 qt_document_bar_create_widgets (QtDocumentBar * self) 
@@ -57,7 +82,7 @@ qt_document_bar_create_widgets (QtDocumentBar * self)
 	self->priv->extra_popover = 
 		GTK_POPOVER (gtk_popover_new(GTK_WIDGET (extra_menu_img)));
 	gtk_container_add(GTK_CONTAINER (self->priv->extra_popover), 
-									  GTK_WIDGET (self->priv->extra_menu));
+									  GTK_WIDGET (self->priv->extra_box));
 	g_object_set (GTK_WIDGET (self->priv->extra_popover), 
 							  "width-request", 320,   
 							  NULL);
@@ -65,14 +90,64 @@ qt_document_bar_create_widgets (QtDocumentBar * self)
 	gtk_box_pack_end(GTK_BOX (self), 
 									 GTK_WIDGET (self->priv->extra_menu), 
 									 FALSE, TRUE, 3);
-	gtk_widget_hide(GTK_WIDGET (self->priv->extra_menu));
 	gtk_widget_show_all(GTK_WIDGET (self));
+	gtk_widget_hide(GTK_WIDGET (self->priv->extra_menu));
 }
 
 void 
 qt_document_bar_set_stack (QtDocumentBar * self, GtkStack * stack) 
 {
 	self->priv->stack = stack;
+}
+
+GTimeoutArgs * 
+g_timeout_args_new (QtDocumentBar * self, gboolean open_doc) 
+{
+  GTimeoutArgs * new_args = (GTimeoutArgs *) malloc(sizeof (GTimeoutArgs));
+  new_args->self = self;
+  new_args->label_timeout = 0;
+  new_args->open_doc = open_doc;
+  return new_args;
+}
+
+static void
+g_timeout_args_destroy (void * data) 
+{
+  GTimeoutArgs * args = (GTimeoutArgs *) data;
+  args->self = NULL;
+  free(args);
+}
+
+static gboolean g_timeout_func_cb (gpointer data) 
+{
+  GTimeoutArgs * args = (GTimeoutArgs *) data;
+  switch (args->label_timeout) {
+    default:
+    case 0: {
+      if (args->open_doc) {
+        gtk_label_set_label(
+          args->self->priv->extra_label, 
+          "<b>+1 </b>");
+      } else {
+        gtk_label_set_label(
+          args->self->priv->extra_label, 
+          "<b>-1 </b>");
+      }
+      
+      break;
+    } case 1: {
+      const gchar * new_label = 
+        g_strdup_printf("<b>%d </b>", args->self->priv->doc_extra_num);
+      
+      gtk_label_set_label(
+        args->self->priv->extra_label, 
+        new_label);
+      return FALSE;
+    }
+  }
+  
+  args->label_timeout++;
+  return TRUE;
 }
 
 void 
@@ -83,7 +158,6 @@ qt_document_bar_add_doc (QtDocumentBar * self, QtDocument * doc)
 			gtk_widget_hide(GTK_WIDGET (self->priv->extra_menu));
 		
 		gtk_box_pack_start(GTK_BOX (self), GTK_WIDGET (doc), TRUE, TRUE, 5);
-		/* append doc */
 		self->priv->doc_num++;
 	} else {
 		gtk_widget_show(GTK_WIDGET (self->priv->extra_menu));
@@ -91,6 +165,17 @@ qt_document_bar_add_doc (QtDocumentBar * self, QtDocument * doc)
 										   GTK_WIDGET (doc), 
 										   FALSE, TRUE, 7);
 		self->priv->doc_extra_num++;
+
+		const gchar * extra_menu_tooltip = 
+      g_strdup_printf(_ ("Hidden tabs: %d"), self->priv->doc_extra_num);
+		gtk_widget_set_tooltip_text(GTK_WIDGET (self->priv->extra_menu), 
+                                extra_menu_tooltip);
+		
+    GTimeoutArgs * timeout_args = g_timeout_args_new(self, TRUE);
+		g_timeout_add_full(G_PRIORITY_HIGH, 250,
+                       g_timeout_func_cb, 
+                       timeout_args, 
+                       g_timeout_args_destroy);
 	}
 } 
 
@@ -100,9 +185,7 @@ qt_document_bar_init (QtDocumentBar * self)
 
 static void 
 qt_document_bar_class_init (QtDocumentBarClass * class) 
-{
-	
-}
+{}
 
 QtDocumentBar * 
 qt_document_bar_new (void) 

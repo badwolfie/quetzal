@@ -2,6 +2,7 @@
 #include "qt-headerbar.h"
 #include "qt-documentbar.h"
 #include "qt-document.h"
+#include "quetzal.h"
 
 #include "config.h"
 #include <glib/gi18n.h>
@@ -62,14 +63,9 @@ qt_app_window_add_new_doc (QtAppWindow * self, QtDocument * new_doc)
 	const gchar * doc_name = g_strdup_printf("tab - %d", self->priv->counter++);
   GtkScrolledWindow * doc_scroll = qt_document_get_doc_scroll(new_doc);
 	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
-	// qt_document_bar_add_doc(self->priv->doc_bar, new_doc); // ERROR AQUI!!
+	qt_document_bar_add_doc(self->priv->doc_bar, new_doc); // ERROR AQUI!!
 	
-	const gchar * header_title = qt_document_get_doc_path(new_doc);
-  if (g_strcmp0(header_title, self->priv->untitled) == 0) {
-    header_title = 
-      g_strdup_printf("%s %d", self->priv->untitled, self->priv->counter);
-  }
-
+	const gchar * header_title = g_strdup(qt_document_get_doc_path(new_doc));
   gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->fs_header_bar), 
 													 header_title);
 	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->header_bar), 
@@ -84,7 +80,61 @@ qt_app_window_create_new_doc (GObject * sender, gpointer data)
 	qt_app_window_add_new_doc(self, doc);
 }
 
-// qt_app_window_add_new_doc
+static void 
+qt_app_window_add_doc_from_file (QtAppWindow * self, GFile * file) 
+{
+  /* revisar que no este abierto el archivo */
+  QtDocument * doc = qt_document_new(self->priv->editor, file);
+  
+  /* conectar señal dnd */
+  qt_app_window_add_new_doc(self, doc);
+  
+  /* refrescar lenguaje */
+  /* checar docs */
+}
+
+static void 
+qt_app_window_on_selected_files (gpointer data, gpointer user_data) 
+{
+  GFile * entry = G_FILE (data);
+  QtAppWindow * self = QT_APP_WINDOW (user_data);
+  qt_app_window_add_doc_from_file(self, entry);
+}
+
+void 
+qt_app_window_open_file (GObject * sender, gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  GtkFileChooserDialog * file_chooser;
+  file_chooser = GTK_FILE_CHOOSER_DIALOG (
+    gtk_file_chooser_dialog_new(
+      _ ("Open file"), GTK_WINDOW (self), 
+      GTK_FILE_CHOOSER_ACTION_OPEN, 
+      _ ("Cancel"), GTK_RESPONSE_CANCEL, 
+      _ ("Open"), GTK_RESPONSE_ACCEPT, 
+      NULL
+    )
+  );
+  
+  /* set_current_folder */
+  
+  g_object_set(G_OBJECT (file_chooser), 
+               "select-multiple", TRUE, 
+               NULL);
+  
+  if (gtk_dialog_run(GTK_DIALOG (file_chooser)) == GTK_RESPONSE_ACCEPT) {
+    GSList * selected_files = 
+      gtk_file_chooser_get_files(GTK_FILE_CHOOSER (file_chooser));
+      g_slist_foreach(selected_files, qt_app_window_on_selected_files, self);
+  }
+  
+  gtk_widget_destroy(GTK_WIDGET (file_chooser));
+}
+
+  /* g_object_set(G_OBJECT (file_chooser), 
+               "do-overwrite-confirmation", TRUE,  
+               "create-folders", TRUE,
+               NULL); */
 
 static void 
 qt_app_window_create_widgets (QtAppWindow * self) 
@@ -139,21 +189,11 @@ qt_app_window_create_widgets (QtAppWindow * self)
 	gtk_stack_set_transition_duration(self->priv->documents, 250);
 	gtk_widget_show(GTK_WIDGET (self->priv->documents));
 	
-	/* BORRAR ESTA PARTE 
-	GtkScrolledWindow * scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new(NULL, NULL));
-	
-	GFile * file = g_file_new_for_path("/home/iann/Proyectos/Simple Text Editor/src/st-application.c");
-	puts(g_file_get_basename(file));
-	QtSourceView * current_doc = qt_source_view_new(self->priv->editor, file);
-	gtk_container_add(GTK_CONTAINER (scroll), GTK_WIDGET (current_doc));
-	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (scroll), "algo");
-	gtk_widget_show(GTK_WIDGET (current_doc));
-	gtk_widget_show(GTK_WIDGET (scroll));
-
+  /* doc_bar */
 	self->priv->doc_bar = qt_document_bar_new();
 	qt_document_bar_set_stack(self->priv->doc_bar, self->priv->documents);
 	// conectar señales 
-	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));*/
+	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));
 	
 	/* statusbar */
 	
@@ -167,9 +207,9 @@ qt_app_window_create_widgets (QtAppWindow * self)
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->search_bar), 
 										 FALSE, TRUE, 0);
-	/*gtk_box_pack_start(vbox, 
+	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->doc_bar),
-										 FALSE, TRUE, 5);*/
+										 FALSE, TRUE, 5);
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (separator),
 										 FALSE, TRUE, 0);

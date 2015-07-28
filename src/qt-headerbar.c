@@ -1,4 +1,5 @@
 #include "qt-headerbar.h"
+#include "quetzal.h"
 
 #include "config.h"
 #include <glib/gi18n.h>
@@ -82,7 +83,7 @@ qt_header_bar_create_widgets (QtHeaderBar * self)
 	
 	self->priv->exit_fullscreen = GTK_BUTTON (
 		gtk_button_new_from_icon_name("view-restore-symbolic", GTK_ICON_SIZE_MENU));
-	gtk_widget_set_tooltip_text(GTK_WIDGET (self->priv->new_tab_button), 
+	gtk_widget_set_tooltip_text(GTK_WIDGET (self->priv->exit_fullscreen), 
 														  "Leave fullscreen mode");
 	
 	gtk_header_bar_pack_start(GTK_HEADER_BAR (self), 
@@ -100,7 +101,7 @@ qt_header_bar_create_widgets (QtHeaderBar * self)
 	gtk_header_bar_pack_end(GTK_HEADER_BAR (self), 
 													  GTK_WIDGET(self->priv->save_button));
 	
-	gtk_header_bar_set_title(GTK_HEADER_BAR (self), "Quetzal");
+	gtk_header_bar_set_title(GTK_HEADER_BAR (self), _ (QUETZAL_NAME));
 }
 
 void 
@@ -124,6 +125,28 @@ qt_header_bar_connect_signals (QtHeaderBar * self)
 	g_signal_connect (G_OBJECT (self->priv->new_tab_button), 
 									  "clicked", G_CALLBACK (qt_app_window_create_new_doc), 
 									  self->priv->window);
+  
+  g_signal_connect (G_OBJECT (self->priv->open_button), 
+									  "clicked", G_CALLBACK (qt_app_window_open_file), 
+									  self->priv->window);
+  
+  GtkAccelGroup * accels = gtk_accel_group_new();
+  gtk_window_add_accel_group(GTK_WINDOW (self->priv->window), accels);
+  
+  gtk_widget_add_accelerator(GTK_WIDGET (self->priv->new_tab_button), 
+                             "activate", accels, GDK_KEY_N, 
+                             GDK_CONTROL_MASK, 
+                             GTK_ACCEL_VISIBLE);
+  
+  gtk_widget_add_accelerator(GTK_WIDGET (self->priv->open_button), 
+                             "activate", accels, GDK_KEY_O, 
+                             GDK_CONTROL_MASK, 
+                             GTK_ACCEL_VISIBLE);
+  
+  gtk_widget_add_accelerator(GTK_WIDGET (self->priv->menu_button), 
+                             "activate", accels, GDK_KEY_F10, 
+                             GDK_META_MASK, 
+                             GTK_ACCEL_VISIBLE);
 }
 
 QtHeaderBar * 

@@ -1,6 +1,7 @@
 #include "qt-text-editor.h"
 #include "qt-application.h"
 #include "qt-appwindow.h"
+#include "quetzal.h"
 
 #include "config.h"
 #include <glib/gi18n.h>
@@ -37,41 +38,75 @@ qt_prefs_activated (GSimpleAction * action,
 	
 }
 
+const gchar * 
+qt_application_get_license_text (void) 
+{
+	const gchar * license[] = {
+    _ ("Quetzal is free software: you can redistribute it and/or modify "
+       "it under the terms of the GNU General Public License as published by "
+       "the Free Software Foundation, either version 3 of the License, or "
+       "(at your option) any later version."),
+    _ ("Quetzal is distributed in the hope that it will be useful, "
+       "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+       "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
+       "GNU General Public License for more details."),
+    _ ("You should have received a copy of the GNU General Public License "
+       "along with Quetzal.  If not, see <http://www.gnu.org/licenses/>.")
+	};
+
+  const gchar * full_license = 
+    g_strjoin("\n\n", _ (license[0]), _ (license[1]), _ (license[2]), NULL);
+  return full_license;
+}
+
 static void 
 qt_about_activated (GSimpleAction * action, 
 										GVariant * parameter, 
 										gpointer app) 
 {
 	const gchar * author[2] = {
-		"Ian Hernandez <ihernandezs@openmailbox.org>",
+		"Ian Hernández <ihernandezs@openmailbox.org>",
+		NULL 
+	};
+  
+  const gchar * documenters[2] = {
+		"Ian Hernández",
+		NULL 
+	};
+  
+  const gchar * artists[2] = {
+		"Ian Hernández",
 		NULL 
 	};
 
-	const gchar * contrib[2] = {
-		"Carlos Lopez <clopezr_1205@openmailbox.org>",
+	const gchar * contribs[2] = {
+		"Carlos López <clopezr_1205@openmailbox.org>",
 		NULL 
 	};
-
-	gchar * translator_credits = _ ("translator-credits");
-
-	gchar * license = "Pendiente...";
 
 	GtkAboutDialog * about_dialog;
 	about_dialog = GTK_ABOUT_DIALOG (gtk_about_dialog_new());
 	gtk_window_set_transient_for(GTK_WINDOW (about_dialog), 
 															 GTK_WINDOW (QT_APPLICATION (app)->priv->window));
   g_object_set(G_OBJECT (about_dialog),
-               "program-name", APP_NAME,
-               "comments", APP_SHORTDESC,
+               "artists", artists, 
                "authors", author, 
-               "artists", author,
-               // "logo-icon-name", "quetzal",
-               "license", license,
-               "version", APP_VERSION,
-               "website", "http://badwolfie.github.io/quetzal",
-               "website-label", _ ("Web page"),
+               "comments", _ (QUETZAL_SHORTDESC),
                "copyright", "Copyright \xc2\xa9 2015 Ian Hernández",
+               // "documenters", documenters, 
+               "license", qt_application_get_license_text(), 
+               "license-type", GTK_LICENSE_CUSTOM, 
+               "logo-icon-name", "quetzal",
+               "program-name", _ (QUETZAL_NAME),
+               "translator-credits", _ ("translator-credits"), 
+               "version", QUETZAL_VERSION,
+               "website", "https://badwolfie.github.io/quetzal",
+               "website-label", _ ("Official web page"),
+               "wrap-license", TRUE, 
                NULL);
+  gtk_about_dialog_add_credit_section(about_dialog, 
+                                      _ ("Contributors"), 
+                                      contribs);
 	
 	gtk_dialog_run ((GtkDialog *) about_dialog);
 	gtk_widget_destroy ((GtkWidget *) about_dialog);
@@ -163,7 +198,7 @@ qt_application_startup (GApplication * self)
 																			 quit_accels);
 	
 	QT_APPLICATION (self)->priv->settings = 
-		g_settings_new("com.github.badwolfie.simple-text");
+		g_settings_new("com.github.badwolfie.quetzal");
 	
 	QtTextEditor * editor = qt_text_editor_new();
 	

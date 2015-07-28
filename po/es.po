@@ -1,12 +1,12 @@
-# Spanish translations for Simple Text package.
-# Traducciones en español para el paquete Simple Text.
+# Spanish translations for the Quetzal package.
+# Traducciones en español para el paquete Quetzal.
 # Copyright (C) 2015 Ian Hernández
-# This file is distributed under the same license as the Simple Text package.
+# This file is distributed under the same license as the Quetzal package.
 # Ian Hernández <ihernandezs@openmailbox.org>, 2015.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Text 0.9.7\n"
+"Project-Id-Version: Quetzal 0.11.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-05-11 21:24-0500\n"
 "PO-Revision-Date: 2015-05-11 21:24-0500\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Preferences"
 msgstr "Preferencias"
 
-#: ../data/menu.ui.h:2 ../src/st-application.vala:218
+#: ../data/menu.ui.h:2 ../src/qt-application.c:218
 msgid "About"
 msgstr "Acerca de"
 
@@ -80,11 +80,11 @@ msgstr "Cerrar pestaña actual"
 msgid "Reopen last tab"
 msgstr "Re-abrir última pestaña"
 
-#: ../src/st-application.vala:223
-msgid "Web page"
-msgstr "Página web"
+#: ../src/qt-application.c:223
+msgid "Official web page"
+msgstr "Página web oficial"
 
-#: ../src/st-application.vala:231
+#: ../src/qt-application.c:231
 msgid "Contributors"
 msgstr "Contribuidores"
 
@@ -200,7 +200,7 @@ msgstr "Aceptar"
 msgid "Search highlight mode..."
 msgstr "Buscar modo de resaltado..."
 
-#: ../src/st-application.vala:198
+#: ../src/qt-application.c:198
 msgid "translator-credits"
 msgstr "Ian Hernández"
 
@@ -220,7 +220,7 @@ msgstr "Simple Text"
 msgid "text;editor;development;programming;"
 msgstr "texto;editor;desarrollo;programación"
 
-#: ../data/simple-text.desktop.in.h:3 ../src/st-application.vala:221
+#: ../data/simple-text.desktop.in.h:3 ../src/qt-application.c:221
 msgid "A not so simple text and code editor written in Vala"
 msgstr "Un editor de texto y código, no tan simple, escrito en Vala."
 
