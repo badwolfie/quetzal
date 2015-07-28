@@ -51,36 +51,43 @@ qt_app_window_class_init (QtAppWindowClass * class)
 {}
 
 QtTextEditor * 
-qt_appwindow_get_editor (QtAppWindow * self) 
+qt_app_window_get_editor (QtAppWindow * self) 
 {
 	return self->priv->editor;
 }
 
 static void 
-qt_appwindow_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
+qt_app_window_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
 {
 	const gchar * doc_name = g_strdup_printf("tab - %d", self->priv->counter++);
-	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (new_doc), doc_name);
-	qt_document_bar_add_doc(self->priv->doc_bar, new_doc);
+  GtkScrolledWindow * doc_scroll = qt_document_get_doc_scroll(new_doc);
+	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
+	// qt_document_bar_add_doc(self->priv->doc_bar, new_doc); // ERROR AQUI!!
 	
 	const gchar * header_title = qt_document_get_doc_path(new_doc);
-	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->fs_header_bar), 
+  if (g_strcmp0(header_title, self->priv->untitled) == 0) {
+    header_title = 
+      g_strdup_printf("%s %d", self->priv->untitled, self->priv->counter);
+  }
+
+  gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->fs_header_bar), 
 													 header_title);
 	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->header_bar), 
 													 header_title);
 }
 
 void 
-qt_appwindow_create_new_doc (GObject * sender, gpointer data) 
+qt_app_window_create_new_doc (GObject * sender, gpointer data) 
 {
 	QtAppWindow * self = QT_APP_WINDOW (data);
 	QtDocument * doc = qt_document_new(self->priv->editor, NULL);
-	if (doc != NULL) puts ("doc not null");
-	qt_appwindow_add_new_doc(self, doc);
+	qt_app_window_add_new_doc(self, doc);
 }
 
+// qt_app_window_add_new_doc
+
 static void 
-qt_appwindow_create_widgets (QtAppWindow * self) 
+qt_app_window_create_widgets (QtAppWindow * self) 
 {
 	GtkSettings * gtk_settings = gtk_settings_get_default();
 	g_object_set(G_OBJECT (gtk_settings), 
@@ -132,7 +139,7 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 	gtk_stack_set_transition_duration(self->priv->documents, 250);
 	gtk_widget_show(GTK_WIDGET (self->priv->documents));
 	
-	/* BORRAR ESTA PARTE */
+	/* BORRAR ESTA PARTE 
 	GtkScrolledWindow * scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new(NULL, NULL));
 	
 	GFile * file = g_file_new_for_path("/home/iann/Proyectos/Simple Text Editor/src/st-application.c");
@@ -145,8 +152,8 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 
 	self->priv->doc_bar = qt_document_bar_new();
 	qt_document_bar_set_stack(self->priv->doc_bar, self->priv->documents);
-	/* conectar señales */
-	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));
+	// conectar señales 
+	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));*/
 	
 	/* statusbar */
 	
@@ -160,9 +167,9 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->search_bar), 
 										 FALSE, TRUE, 0);
-	gtk_box_pack_start(vbox, 
+	/*gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->doc_bar),
-										 FALSE, TRUE, 5);
+										 FALSE, TRUE, 5);*/
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (separator),
 										 FALSE, TRUE, 0);
@@ -188,7 +195,7 @@ qt_appwindow_create_widgets (QtAppWindow * self)
 }
 
 static void 
-qt_appwindow_on_toggle_search_cb (GSimpleAction * sender, 
+qt_app_window_on_toggle_search_cb (GSimpleAction * sender, 
 																	GVariant * parameter, 
 																	gpointer data) 
 {
@@ -230,7 +237,7 @@ qt_appwindow_on_toggle_search_cb (GSimpleAction * sender,
 }
 
 static void 
-qt_appwindow_on_fullscreen_cb (GSimpleAction * sender, 
+qt_app_window_on_fullscreen_cb (GSimpleAction * sender, 
 															 GVariant * parameter, 
 															 gpointer data) 
 {
@@ -250,7 +257,7 @@ qt_appwindow_on_fullscreen_cb (GSimpleAction * sender,
 }
 
 static void 
-qt_appwindow_on_show_terminal_cb (GSimpleAction * sender, 
+qt_app_window_on_show_terminal_cb (GSimpleAction * sender, 
 																  GVariant * parameter, 
 																	gpointer data)
 {
@@ -297,12 +304,12 @@ qt_appwindow_on_show_terminal_cb (GSimpleAction * sender,
 }
 
 static void 
-qt_appwindow_connect_signals (QtAppWindow * self) 
+qt_app_window_connect_signals (QtAppWindow * self) 
 {
 	GSimpleAction * action_fullscreen = g_simple_action_new("fullscreen", NULL);
 	g_signal_connect (action_fullscreen, 
 									  "activate", 
-									  G_CALLBACK (qt_appwindow_on_fullscreen_cb), 
+									  G_CALLBACK (qt_app_window_on_fullscreen_cb), 
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_fullscreen));
 	
@@ -310,7 +317,7 @@ qt_appwindow_connect_signals (QtAppWindow * self)
 		"toggle_terminal", NULL);
 	g_signal_connect (action_show_terminal, 
 									  "activate", 
-									  G_CALLBACK (qt_appwindow_on_show_terminal_cb), 
+									  G_CALLBACK (qt_app_window_on_show_terminal_cb), 
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_show_terminal));
 	
@@ -318,13 +325,13 @@ qt_appwindow_connect_signals (QtAppWindow * self)
 		"search_mode", NULL);
 	g_signal_connect (action_toggle_search, 
 									  "activate", 
-									  G_CALLBACK (qt_appwindow_on_toggle_search_cb),
+									  G_CALLBACK (qt_app_window_on_toggle_search_cb),
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_toggle_search));
 }
 
 QtAppWindow * 
-qt_appwindow_new (QtApplication * app, QtTextEditor * editor) 
+qt_app_window_new (QtApplication * app, QtTextEditor * editor) 
 {
 	QtAppWindow * new_window;
 	new_window = QT_APP_WINDOW (
@@ -346,8 +353,8 @@ qt_appwindow_new (QtApplication * app, QtTextEditor * editor)
 	gtk_container_set_border_width(GTK_CONTAINER (new_window), 0);
 	// gtk_window_maximize(GTK_WINDOW (new_window));
 	
-	qt_appwindow_create_widgets(new_window);
-	qt_appwindow_connect_signals(new_window);
+	qt_app_window_create_widgets(new_window);
+	qt_app_window_connect_signals(new_window);
 	return new_window;
 }
 

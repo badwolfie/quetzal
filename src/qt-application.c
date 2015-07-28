@@ -279,7 +279,7 @@ qt_application_startup (GApplication * self)
 		)
 	);
 	
-	QT_APPLICATION (self)->priv->window = qt_appwindow_new(
+	QT_APPLICATION (self)->priv->window = qt_app_window_new(
 		QT_APPLICATION (self), editor
 	);
 	
@@ -379,7 +379,7 @@ qt_application_shutdown (GApplication * self)
 	G_APPLICATION_CLASS (qt_application_parent_class)->shutdown(self);
 	
 	QtTextEditor * editor = 
-		qt_appwindow_get_editor(QT_APPLICATION (self)->priv->window);
+		qt_app_window_get_editor(QT_APPLICATION (self)->priv->window);
 
 	g_settings_set_boolean(
 		QT_APPLICATION (self)->priv->settings, 

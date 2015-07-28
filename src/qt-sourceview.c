@@ -172,7 +172,7 @@ qt_source_view_save_file_ready (GObject * sender,
 	GtkSourceBuffer * buffer = 
 		GTK_SOURCE_BUFFER (gtk_text_view_get_buffer(GTK_TEXT_VIEW (self)));
 	
-	GError * inner_error;
+	GError * inner_error = NULL;
 	gboolean file_saved = 
 		gtk_source_file_saver_save_finish(self->priv->file_saver, 
 																		  NULL, &inner_error);
@@ -215,7 +215,7 @@ qt_source_view_save_file (QtSourceView * self, GFile * target_file)
 	if (target_file != NULL) {
 		gtk_source_file_set_location(self->priv->source_file, target_file);
 		
-		GError * inner_error;
+		GError * inner_error = NULL;
 		if (!g_file_query_exists(target_file, NULL)) {
 			g_file_create(target_file, G_FILE_CREATE_NONE, NULL, &inner_error);
 			if (inner_error != NULL) {
@@ -257,7 +257,7 @@ qt_source_view_create_components (QtSourceView * self, GFile * file)
 			NULL
 		);
 		
-		GError * inner_error;
+		GError * inner_error = NULL;
 		gboolean provider_added = FALSE;
 		GtkSourceCompletion * completion;
 		
@@ -357,7 +357,6 @@ qt_source_view_on_drag_data_received (GtkWidget * sender,
 static void 
 qt_source_view_set_font (QtSourceView * self, const gchar * font_description) 
 {
-	GError * inner_error;
 	GtkCssProvider * css_provider = gtk_css_provider_new();
 	const gchar * css_data = g_strconcat(
 		"GtkSourceView { font: ", 
@@ -366,9 +365,10 @@ qt_source_view_set_font (QtSourceView * self, const gchar * font_description)
 		NULL
 	);
 	
-	gtk_css_provider_load_from_data(css_provider, css_data, -1, &inner_error);
-	
-	if (inner_error != NULL) {
+	GError * inner_error = NULL;
+	gboolean data_loaded = 
+    gtk_css_provider_load_from_data(css_provider, css_data, -1, &inner_error);
+	if (!data_loaded || inner_error != NULL) {
 		g_error("gtk_css_provider_load_from_data error: %s\n", 
 					  inner_error->message);
 		g_error_free(inner_error);

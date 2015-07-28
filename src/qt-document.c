@@ -24,8 +24,9 @@ struct _QtDocumentPrivate
 	GtkLabel * title_label;
 	GtkEventBox * close_button;
 	GtkScrolledWindow * doc_scroll;
-	const gchar * doc_title;
 	GtkLabel * doc_is_modified;
+	const gchar * doc_title;
+  const gchar * doc_path;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (QtDocument, qt_document, GTK_TYPE_BOX);
@@ -75,10 +76,7 @@ qt_document_change_language (QtDocument * self, const gchar * language)
 const gchar * 
 qt_document_get_doc_path (QtDocument * self) 
 {
-	GtkSourceFile * source_file = 
-		qt_source_view_get_source_file(self->priv->doc_view);
-	GFile * file = gtk_source_file_get_location(source_file);
-	return g_file_get_path(file);
+  return self->priv->doc_path;
 }
 
 const gchar * 
@@ -142,7 +140,8 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 	);
 	
 	gtk_event_box_set_above_child(self->priv->close_button, TRUE);
-	g_object_set(GTK_CONTAINER (self->priv->close_button), "child", close_img,
+	g_object_set(GTK_CONTAINER (self->priv->close_button), 
+               "child", close_img,
 							 NULL);
 	/*conectar señal*/
 	
@@ -156,7 +155,6 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 	gtk_box_pack_start(GTK_BOX (self), 
 										 GTK_WIDGET (self->priv->close_button), 
 										 FALSE, TRUE, 0);
-	
 	self->priv->doc_view = qt_source_view_new(self->priv->editor, file);
 	/* conectar señal */
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_view));
@@ -226,23 +224,21 @@ qt_document_new (QtTextEditor * editor, GFile * file)
 		NULL
 	);
 	
-	if (new_document != NULL) puts("qt_document created");
 	new_document->priv = qt_document_get_instance_private(new_document);
 	new_document->priv->untitled = _ ("Untitled file");
 	new_document->priv->editor = editor;
 	
 	if (file != NULL) {
 		new_document->priv->doc_title = g_strdup(g_file_get_basename(file));
+    new_document->priv->doc_path = g_strdup(g_file_get_path(file));
 	} else {
 		new_document->priv->doc_title = g_strdup(new_document->priv->untitled);
+    new_document->priv->doc_path = g_strdup(new_document->priv->untitled);
 	}
 	
 	g_object_set (GTK_WIDGET (new_document), 
 							  "width-request", 150,   
 							  NULL);
-	gtk_orientable_set_orientation(GTK_ORIENTABLE (new_document), GTK_ORIENTATION_HORIZONTAL);
-	gtk_box_set_spacing(GTK_BOX (new_document), 0);
-	
 	qt_document_create_widgets(new_document, file);
 	return new_document;
 }

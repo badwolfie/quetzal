@@ -13,10 +13,10 @@ typedef struct _QtAppWindowClass QtAppWindowClass;
 typedef struct _QtAppWindowPrivate QtAppWindowPrivate;
 
 GType qt_app_window_get_type (void); 
-QtAppWindow * qt_appwindow_new (QtApplication * app, QtTextEditor * editor);
+QtAppWindow * qt_app_window_new (QtApplication * app, QtTextEditor * editor);
 
-QtTextEditor * qt_appwindow_get_editor (QtAppWindow * self);
-void qt_appwindow_create_new_doc (GObject * sender, gpointer data);
+QtTextEditor * qt_app_window_get_editor (QtAppWindow * self);
+void qt_app_window_create_new_doc (GObject * sender, gpointer data);
 
 
 #endif /* QTAPPWINDOW_H */

@@ -15,7 +15,7 @@ Dependencies (package names may vary depending on your distribution):
 * vte-2.91 >= 0.40
 * autoconf (makedep)
 * automake (makedep)
-* git (makedep, not necessary if you downloaded the tarball)
+* git (makedep, not necessary if you downloaded the source code)
 
 Then, simply do:
 ```
@@ -31,7 +31,7 @@ Or check the [releases page](https://github.com/badwolfie/quetzal/releases) for 
 ## Shortcuts
 | Key | Action |
 |:---:|:---|
-| Ctrl + B | Build project (You need to create a Makefile in the directory before using this feature) |
+| Ctrl + B | Build project (You need to create a Makefile in the project's directory before using this feature) |
 | Ctrl + Shift + C | Toggle embeded terminal |
 | Ctrl + F | Toggle searching mode |
 | Ctrl + N | Open a new file |
@@ -46,8 +46,8 @@ Or check the [releases page](https://github.com/badwolfie/quetzal/releases) for 
 | Ctrl + Shift + T | Re-open last closed file |
 | Ctrl + W | Close current file |
 | Ctrl + Shift + W | Close all files |
-| Ctrl + Z | Undo last step |
-| Ctrl + Shift + Z | Redo last step |
+| Ctrl + Z | Undo last done step |
+| Ctrl + Shift + Z | Redo last undone step |
 | F1 | Open about window |
 | Ctrl + F1 | Open preferences window |
 | F10 | Open popover menu |
