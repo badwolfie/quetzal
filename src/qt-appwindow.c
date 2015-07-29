@@ -1,6 +1,7 @@
 #include "qt-appwindow.h"
 #include "qt-headerbar.h"
 #include "qt-documentbar.h"
+#include "qt-sourceview.h"
 #include "qt-document.h"
 #include "quetzal.h"
 
@@ -8,6 +9,14 @@
 #include <glib/gi18n.h>
 #include <vte/vte.h>
 #include <stdlib.h>
+
+typedef struct _GListForeachParams GListForeachParams;
+
+struct _GListForeachParams 
+{
+  gchar * workspace;
+  gchar * untitled;
+};
 
 struct _QtAppWindow 
 {
@@ -57,19 +66,156 @@ qt_app_window_get_editor (QtAppWindow * self)
 	return self->priv->editor;
 }
 
+static void qt_app_window_add_doc_from_file (QtAppWindow * self, GFile * file);
+
+static void 
+qt_app_window_load_workspace (QtAppWindow * self) 
+{
+  gchar * workspace = NULL;
+  GError * inner_error = NULL;
+  gboolean loaded = g_file_get_contents(
+    g_strconcat(g_get_home_dir(), "/.quetzal/saved-workspace", NULL), 
+    &workspace, NULL, 
+    &inner_error
+  );
+  
+  if (!loaded || (inner_error != NULL)) {
+    g_error("g_file_get_contents: I/O error: %s", inner_error->message);
+	  g_error_free(inner_error);
+  }
+  
+  if (workspace != NULL) {
+    if (g_strcmp0(workspace, "") == 0) { 
+      qt_app_window_create_new_doc(NULL, self);
+    } else {
+      gchar ** workspace_files = g_strsplit(workspace, "\n", 0);
+      gint workspace_len = array_length(workspace_files);
+
+      gint i, counter = 0;
+      for (i = 0; i < workspace_len; i++) {
+        if (g_strcmp0(workspace_files[i], "") != 0) {
+          GFile * file = g_file_new_for_path(workspace_files[i]);
+          if (g_file_query_exists(file, NULL)) {
+            qt_app_window_add_doc_from_file(self, file);
+            counter++;
+          }
+        }
+      }
+      
+      if (counter == 0) 
+        qt_app_window_create_new_doc(NULL, self);
+    }
+  }
+}
+
+static void 
+qt_app_window_concat_to_saved_workspace (gpointer data, gpointer user_data) 
+{
+  if (!QT_IS_DOCUMENT (data)) return ; 
+  
+  QtDocument * entry = QT_DOCUMENT (data);
+  GListForeachParams * params = (GListForeachParams *) user_data;
+  
+  const gchar * doc_path = qt_document_get_doc_path(entry);
+  if (g_strcmp0(doc_path, params->untitled) == 0) return ;
+
+  params->workspace = g_strconcat(params->workspace, doc_path, "\n", NULL);
+}
+
+GListForeachParams * 
+g_list_foreach_params_new (void) 
+{
+  GListForeachParams * params = 
+    (GListForeachParams *) malloc(sizeof (GListForeachParams));
+  params->untitled = g_strdup(_ ("Untitled file"));
+  params->workspace = g_strdup("");
+  return params;
+}
+
+static void 
+qt_app_window_save_workspace (QtAppWindow * self) 
+{
+  GListForeachParams * params = g_list_foreach_params_new();
+  GList * docs = qt_document_bar_get_doc_list(self->priv->doc_bar);
+  GList * extra_docs = qt_document_bar_get_extra_doc_list(self->priv->doc_bar);
+  
+  if (docs != NULL)
+    g_list_foreach(docs, qt_app_window_concat_to_saved_workspace, params);
+  
+  if (extra_docs != NULL)
+    g_list_foreach(extra_docs, qt_app_window_concat_to_saved_workspace, params);
+  
+  GError * inner_error = NULL;
+  gboolean saved = g_file_set_contents(
+    g_strconcat(g_get_home_dir(), "/.quetzal/saved-workspace", NULL), 
+    params->workspace, -1,
+    &inner_error
+  );
+  
+  if (!saved || (inner_error != NULL)) {
+    g_error("g_file_set_contents: I/O error: %s", inner_error->message);
+	  g_error_free(inner_error);
+  }
+}
+
+static void 
+qt_app_window_quit_cb (GtkWidget * sender, gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  gboolean save = qt_text_editor_get_save_workspace(self->priv->editor);
+  
+  if ((self->priv->editor != NULL) && save) {
+    qt_app_window_save_workspace(self);
+  }
+}
+
+void 
+qt_app_window_set_arg_files (QtAppWindow * self, 
+                             GFile ** arg_files, 
+                             gint n_files) 
+{
+  gboolean load_workspace = 
+    qt_text_editor_get_save_workspace(self->priv->editor);
+  if ((self->priv->editor != NULL) && load_workspace) {
+    qt_app_window_load_workspace(self);
+  }
+  
+  gint i;
+  if (arg_files != NULL) {
+    for (i = 0; i < n_files; i++) {
+      if (g_file_query_exists(arg_files[i], NULL)) 
+        qt_app_window_add_doc_from_file(self, arg_files[i]);
+    }
+  }
+}
+
+static void 
+qt_app_window_on_drag_n_drop (QtDocument * sender, 
+                              GFile * file, 
+                              gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  qt_app_window_add_doc_from_file(self, file);
+}
+
 static void 
 qt_app_window_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
 {
+  g_signal_connect (new_doc, "view-drag-n-drop", 
+                    G_CALLBACK (qt_app_window_on_drag_n_drop), 
+                    self);
+  
 	const gchar * doc_name = g_strdup_printf("tab - %d", self->priv->counter++);
   GtkScrolledWindow * doc_scroll = qt_document_get_doc_scroll(new_doc);
-	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
+	// gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
+  gtk_stack_add_titled(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name, doc_name);
 	qt_document_bar_add_doc(self->priv->doc_bar, new_doc); // ERROR AQUI!!
 	
 	const gchar * header_title = g_strdup(qt_document_get_doc_path(new_doc));
-  gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->fs_header_bar), 
-													 header_title);
-	gtk_header_bar_set_title(GTK_HEADER_BAR (self->priv->header_bar), 
-													 header_title);
+  gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->fs_header_bar), 
+                              header_title);
+  gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->header_bar), 
+                              header_title);
 }
 
 void 
@@ -83,10 +229,10 @@ qt_app_window_create_new_doc (GObject * sender, gpointer data)
 static void 
 qt_app_window_add_doc_from_file (QtAppWindow * self, GFile * file) 
 {
-  /* revisar que no este abierto el archivo */
-  QtDocument * doc = qt_document_new(self->priv->editor, file);
+  if (qt_document_bar_doc_is_opened(self->priv->doc_bar, file)) 
+    return ;
   
-  /* conectar señal dnd */
+  QtDocument * doc = qt_document_new(self->priv->editor, file);
   qt_app_window_add_new_doc(self, doc);
   
   /* refrescar lenguaje */
@@ -131,10 +277,79 @@ qt_app_window_open_file (GObject * sender, gpointer data)
   gtk_widget_destroy(GTK_WIDGET (file_chooser));
 }
 
-  /* g_object_set(G_OBJECT (file_chooser), 
-               "do-overwrite-confirmation", TRUE,  
-               "create-folders", TRUE,
-               NULL); */
+void 
+qt_app_window_save_doc_to_file (GObject * sender, gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  QtDocument * current_doc = 
+    qt_document_bar_get_current_doc(self->priv->doc_bar);
+  
+  if (current_doc == NULL) return ;
+  const gchar * current_doc_path = qt_document_get_doc_path(current_doc);
+  
+  if (g_strcmp0(current_doc_path, self->priv->untitled) == 0) {
+    QtSourceView * current_view = qt_document_get_doc_view(current_doc);
+    const gchar * current_view_text;
+    g_object_get(
+      G_OBJECT (gtk_text_view_get_buffer(GTK_TEXT_VIEW (current_view))), 
+      "text", &current_view_text, 
+      NULL
+    );
+    
+    if (g_strcmp0(current_view_text, "") == 0) return ;
+    
+    GtkFileChooserDialog * file_chooser;
+    file_chooser = GTK_FILE_CHOOSER_DIALOG (
+      gtk_file_chooser_dialog_new(
+        _ ("Save file"), GTK_WINDOW (self), 
+        GTK_FILE_CHOOSER_ACTION_SAVE, 
+        _ ("Cancel"), GTK_RESPONSE_CANCEL, 
+        _ ("Save"), GTK_RESPONSE_ACCEPT, 
+        NULL
+      )
+    );
+  
+    g_object_set(G_OBJECT (file_chooser), 
+                 "do-overwrite-confirmation", TRUE,  
+                 "create-folders", TRUE,
+                 NULL);
+    
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER (file_chooser), 
+                                        g_get_home_dir());
+
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER (file_chooser), 
+                                      self->priv->untitled);
+    
+    if (gtk_dialog_run(GTK_DIALOG (file_chooser)) == GTK_RESPONSE_ACCEPT) {
+      GFile * file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER (file_chooser));
+      qt_document_set_doc_path(current_doc, g_file_get_path(file));
+      qt_document_set_doc_title(current_doc, g_file_get_basename(file));
+      
+      gtk_header_bar_set_subtitle(GTK_HEADER_BAR(self->priv->header_bar), 
+                                  g_file_get_path(file));
+      gtk_header_bar_set_subtitle(GTK_HEADER_BAR(self->priv->fs_header_bar), 
+                                  g_file_get_path(file));
+      qt_source_view_save_file(current_view, file);
+      qt_document_mark_title(current_doc);
+      
+      /* refrescar lenguaje */
+    }
+                                                                
+    gtk_widget_destroy(GTK_WIDGET (file_chooser));
+  } /*else if () {
+    qt_source_view_save_file(current_view, NULL);
+  }*/
+  
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+  /*******************************************/
+}
 
 static void 
 qt_app_window_create_widgets (QtAppWindow * self) 
@@ -196,6 +411,11 @@ qt_app_window_create_widgets (QtAppWindow * self)
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));
 	
 	/* statusbar */
+  
+  GtkStackSwitcher * switcher = GTK_STACK_SWITCHER (gtk_stack_switcher_new());
+  gtk_stack_switcher_set_stack(switcher, self->priv->documents);
+  gtk_header_bar_set_custom_title(GTK_HEADER_BAR (self->priv->header_bar), GTK_WIDGET (switcher));
+  gtk_widget_show(GTK_WIDGET (switcher));
 	
 	GtkSeparator * separator = 
 		GTK_SEPARATOR (gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
@@ -368,6 +588,10 @@ qt_app_window_connect_signals (QtAppWindow * self)
 									  G_CALLBACK (qt_app_window_on_toggle_search_cb),
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_toggle_search));
+  
+  g_signal_connect (GTK_WIDGET (self), 
+                    "destroy", G_CALLBACK (qt_app_window_quit_cb), 
+                    self);
 }
 
 QtAppWindow * 

@@ -1,9 +1,11 @@
 #include <gtksourceview/completion-providers/words/gtksourcecompletionwords.h>
 #include "qt-sourceview.h"
-#include <stdlib.h>
+#include "quetzal.h"
+
 #include "config.h"
 #include <glib/gi18n.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define TARGET_TYPE_URI_LIST 80
 
@@ -50,9 +52,9 @@ qt_source_view_class_init (QtSourceViewClass * class)
 							 QT_SOURCE_VIEW_TYPE, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
-							 g_cclosure_marshal_VOID__STRING,
+							 g_cclosure_marshal_VOID__OBJECT,
 							 G_TYPE_NONE, 1, 
-							 G_TYPE_STRING);
+							 G_TYPE_FILE);
 	
 	g_signal_new("file_saved", 
 							 QT_SOURCE_VIEW_TYPE, 
@@ -209,7 +211,7 @@ qt_source_view_save_file_ready (GObject * sender,
 	}
 }
 
-static void 
+void 
 qt_source_view_save_file (QtSourceView * self, GFile * target_file) 
 {
 	if (target_file != NULL) {
@@ -297,32 +299,20 @@ qt_source_view_create_components (QtSourceView * self, GFile * file)
 	qt_source_view_load_file(self);
 }
 
-static gint 
-array_length (gpointer array) 
-{
-	int length = 0;
-	if (array) {
-		while (((gpointer *) array)[length]) {
-			length++;
-		}
-	}
-	
-	return length;
-}
-
 static gchar * 
 qt_source_view_get_file_path_from_uri (const gchar * uri) 
 {
 	gchar * result = NULL;
 	gchar * path = NULL;
+  gint string_len = strlen(uri);
 	gint offset = 0;
 	
 	if (g_str_has_prefix(uri, "file://")) {
 		offset = strlen("file://");
-		path = g_strndup(uri + offset, (gsize) -1);
+		path = g_strndup(uri + offset, string_len - offset);
 	} else if (g_str_has_prefix(uri, "file:")) {
 		offset = strlen("file:");
-		path = g_strndup(uri + offset, (gsize) -1);
+		path = g_strndup(uri + offset, string_len - offset);
 	}
 	
 	result = g_strstrip (path);
@@ -348,7 +338,16 @@ qt_source_view_on_drag_data_received (GtkWidget * sender,
 		gint i, uri_list_length = array_length(uri_list);
 		for (i = 0; i < uri_list_length; i++) {
 			gchar * path = qt_source_view_get_file_path_from_uri(uri_list[i]);
-			g_signal_emit_by_name(self, "drag-n-drop", path);
+      GFile * file = g_file_new_for_path(path);
+      gboolean is_dir = (
+        g_file_query_file_type(file, G_FILE_QUERY_INFO_NONE, NULL) == 
+        G_FILE_TYPE_DIRECTORY
+      );
+    
+      if (g_file_query_exists(file, NULL) && !is_dir) {
+			  g_signal_emit_by_name(self, "drag-n-drop", file);        
+      }
+
 			g_free(path);
 		}
 	}

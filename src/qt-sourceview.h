@@ -18,8 +18,11 @@ QtSourceView * qt_source_view_new (QtTextEditor * editor, GFile * file);
 
 const gchar * qt_source_view_get_language_name (QtSourceView * self);
 GtkSourceFile * qt_source_view_get_source_file (QtSourceView * self);
+
 GtkSourceBuffer * qt_source_view_get_source_buffer (QtSourceView * self);
 GtkSourceSearchSettings * qt_source_view_get_search_settings (QtSourceView * self);
+
+void qt_source_view_save_file (QtSourceView * self, GFile * target_file);
 void qt_source_view_change_language (QtSourceView * self, const gchar * language);
 
 #endif /* QT_SOURCE_VIEW_H */

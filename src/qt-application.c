@@ -117,7 +117,9 @@ qt_quit_activated (GSimpleAction * action,
 									 GVariant * parameter, 
 									 gpointer app) 
 {
-	g_application_quit (G_APPLICATION (app));
+  QtApplication * self = QT_APPLICATION (app);
+  gtk_widget_destroy(GTK_WIDGET (self->priv->window));
+	g_application_quit (G_APPLICATION (self));
 }
 
 static GActionEntry quetzal_app_entries[] = {
@@ -393,6 +395,7 @@ qt_application_activate (GApplication * self)
 	QtApplication * application;
 	
 	application = QT_APPLICATION (self);
+  qt_app_window_set_arg_files(application->priv->window, NULL, 0);
 	gtk_window_present(GTK_WINDOW (application->priv->window));
 }
 
@@ -405,6 +408,7 @@ qt_application_open (GApplication * self,
 	QtApplication * application;
 	
 	application = QT_APPLICATION (self);
+  qt_app_window_set_arg_files(application->priv->window, files, n_files);
 	gtk_window_present(GTK_WINDOW (application->priv->window));
 }
 

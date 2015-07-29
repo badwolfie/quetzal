@@ -129,6 +129,9 @@ qt_header_bar_connect_signals (QtHeaderBar * self)
   g_signal_connect (G_OBJECT (self->priv->open_button), 
 									  "clicked", G_CALLBACK (qt_app_window_open_file), 
 									  self->priv->window);
+  g_signal_connect (G_OBJECT (self->priv->save_button), 
+                    "clicked", G_CALLBACK (qt_app_window_save_doc_to_file), 
+                    self->priv->window);
   
   GtkAccelGroup * accels = gtk_accel_group_new();
   gtk_window_add_accel_group(GTK_WINDOW (self->priv->window), accels);
@@ -140,6 +143,11 @@ qt_header_bar_connect_signals (QtHeaderBar * self)
   
   gtk_widget_add_accelerator(GTK_WIDGET (self->priv->open_button), 
                              "activate", accels, GDK_KEY_O, 
+                             GDK_CONTROL_MASK, 
+                             GTK_ACCEL_VISIBLE);
+  
+  gtk_widget_add_accelerator(GTK_WIDGET (self->priv->save_button), 
+                             "activate", accels, GDK_KEY_S, 
                              GDK_CONTROL_MASK, 
                              GTK_ACCEL_VISIBLE);
   

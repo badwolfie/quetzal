@@ -35,9 +35,6 @@ struct _QtDocumentBarPrivate
 	GtkEventBox * extra_menu;
 	GtkPopover * extra_popover;
 	GtkLabel * extra_label;
-	
-	GList * docs;
-	GList * extra_docs;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (QtDocumentBar, qt_document_bar, GTK_TYPE_BOX);
@@ -52,6 +49,32 @@ GList *
 qt_document_bar_get_extra_doc_list (QtDocumentBar * self) 
 {
   return gtk_container_get_children(GTK_CONTAINER (self->priv->extra_box));
+}
+
+gboolean 
+qt_document_bar_doc_is_opened (QtDocumentBar * self, GFile * file) 
+{
+  gchar * needle = g_strdup(g_file_get_path(file));
+  gint i, item_number;
+  GList * list;
+
+  list = qt_document_bar_get_doc_list(self);
+  item_number = g_list_length(list);
+  for (i = 0; i < item_number; i++) {
+    QtDocument * entry = g_list_nth_data(list, i);
+    if (g_strcmp0(qt_document_get_doc_path(entry), needle) == 0)
+      return TRUE;
+  }
+  
+  list = qt_document_bar_get_extra_doc_list(self);
+  item_number = g_list_length(list);
+  for (i = 0; i < item_number; i++) {
+    QtDocument * entry = g_list_nth_data(list, i);
+    if (g_strcmp0(qt_document_get_doc_path(entry), needle) == 0)
+      return TRUE;
+  }
+  
+  return FALSE;
 }
 
 static void 
@@ -98,6 +121,40 @@ void
 qt_document_bar_set_stack (QtDocumentBar * self, GtkStack * stack) 
 {
 	self->priv->stack = stack;
+}
+
+QtDocument * 
+qt_document_bar_get_current_doc (QtDocumentBar * self) 
+{
+  QtDocument * current_doc = NULL;
+  GtkScrolledWindow * current_scroll = 
+    GTK_SCROLLED_WINDOW (gtk_stack_get_visible_child(self->priv->stack));
+  gint item_number, i;
+  GList * list;
+  
+  if (current_scroll != NULL) {
+    list = qt_document_bar_get_doc_list(self);
+    item_number = g_list_length(list);
+    
+    for (i = 0; i < item_number; i++) {
+      QtDocument * doc = g_list_nth_data(list, i);
+      if (qt_document_get_doc_scroll(doc) == current_scroll) 
+        current_doc = doc;
+    }
+
+    if (current_doc == NULL) {
+      list = qt_document_bar_get_extra_doc_list(self);
+      item_number = g_list_length(list);
+      
+      for (i = 0; i < item_number; i++) {
+        QtDocument * doc = g_list_nth_data(list, i);
+        if (qt_document_get_doc_scroll(doc) == current_scroll) 
+          current_doc = doc;
+      }
+    }
+  }
+  
+  return current_doc;
 }
 
 GTimeoutArgs * 

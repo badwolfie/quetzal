@@ -37,10 +37,11 @@ qt_document_init (QtDocument * self)
 
 static void 
 qt_document_on_drag_n_drop (QtSourceView * sender, 
-														const gchar * filename, 
+														GFile * file, 
 														gpointer data) 
 {
-	g_signal_emit_by_name(data, "view-drag-n-drop", filename);
+  QtDocument * self = QT_DOCUMENT (data);
+  g_signal_emit_by_name(self, "view-drag-n-drop", file);
 }
 
 static void 
@@ -51,7 +52,7 @@ qt_document_refresh_title (QtDocument * self)
 	}
 }
 
-static void 
+void 
 qt_document_mark_title (QtDocument * self) 
 {
 	gchar * marked_title = g_strconcat(
@@ -83,6 +84,16 @@ const gchar *
 qt_document_get_doc_title (QtDocument * self) 
 {
 	return self->priv->doc_title;
+}
+
+void 
+qt_document_set_doc_path (QtDocument * self, const gchar * value) 
+{
+  if (g_strcmp0(self->priv->doc_path, value) == 0) {
+		return ;
+	}
+  
+  self->priv->doc_path = g_strdup(value);
 }
 
 void 
@@ -123,6 +134,16 @@ qt_document_get_doc_scroll (QtDocument * self)
 }
 
 /* signal senders */
+static gboolean 
+qt_document_on_doc_clicked_cb (GtkWidget * sender, 
+                               GdkEvent * event, 
+                               gpointer data) 
+{
+  QtDocument * self = QT_DOCUMENT (data);
+  g_signal_emit_by_name(sender, "tab-clicked", self);
+  qt_document_mark_title(self);
+  return TRUE;
+}
 
 static void 
 qt_document_create_widgets (QtDocument * self, GFile * file) 
@@ -156,7 +177,10 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 										 GTK_WIDGET (self->priv->close_button), 
 										 FALSE, TRUE, 0);
 	self->priv->doc_view = qt_source_view_new(self->priv->editor, file);
-	/* conectar señal */
+	g_signal_connect (self->priv->doc_view, 
+                    "drag_n_drop", 
+                    G_CALLBACK (qt_document_on_drag_n_drop), 
+                    self);
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_view));
 	
 	self->priv->doc_scroll = GTK_SCROLLED_WINDOW (
@@ -192,28 +216,28 @@ static void
 qt_document_class_init (QtDocumentClass * class) 
 {
 	g_signal_new("close_clicked", 
-							 QT_DOCUMENT_TYPE, 
+							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
 							 g_cclosure_marshal_VOID__OBJECT,
 							 G_TYPE_NONE, 1, 
-							 QT_DOCUMENT_TYPE);
+							 QT_TYPE_DOCUMENT);
 	
 	g_signal_new("tab_clicked", 
-							 QT_DOCUMENT_TYPE, 
+							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
 							 g_cclosure_marshal_VOID__OBJECT,
 							 G_TYPE_NONE, 1, 
-							 QT_DOCUMENT_TYPE);
+							 QT_TYPE_DOCUMENT);
 	
 	g_signal_new("view_drag_n_drop", 
-							 QT_DOCUMENT_TYPE, 
+							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
-							 g_cclosure_marshal_VOID__STRING,
+							 g_cclosure_marshal_VOID__OBJECT,
 							 G_TYPE_NONE, 1, 
-							 G_TYPE_STRING);
+							 G_TYPE_FILE);
 }
 
 QtDocument * 
@@ -221,7 +245,7 @@ qt_document_new (QtTextEditor * editor, GFile * file)
 {
 	QtDocument * new_document;
 	new_document = g_object_new (
-		QT_DOCUMENT_TYPE, 
+		QT_TYPE_DOCUMENT, 
 		"orientation", GTK_ORIENTATION_HORIZONTAL, 
 		"spacing", 0, 
 		NULL

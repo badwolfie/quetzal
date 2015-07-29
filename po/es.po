@@ -221,8 +221,8 @@ msgid "text;editor;development;programming;"
 msgstr "texto;editor;desarrollo;programación"
 
 #: ../data/simple-text.desktop.in.h:3 ../src/qt-application.c:221
-msgid "A not so simple text and code editor written in Vala"
-msgstr "Un editor de texto y código, no tan simple, escrito en Vala."
+msgid "A simple and lightweight text and code editor."
+msgstr "Un editor de texto y código, simple y ligero."
 
 #: ../src/st-statusbar.vala:78
 msgid "Opened"

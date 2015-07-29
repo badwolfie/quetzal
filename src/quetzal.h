@@ -17,5 +17,18 @@
   QUETZAL_MAJOR_VERSION == (major) && QUETZAL_MINOR_VERSION == (minor) && QUETZAL_MICRO_VERSION >= (micro) \
 )
 
+static gint 
+array_length (gpointer array) 
+{
+	gint length = 0;
+	if (array) {
+		while (((gpointer *) array)[length]) {
+			length++;
+		}
+	}
+	
+	return length;
+}
+
 #endif /* QUETZAL_H */
 
