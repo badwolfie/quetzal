@@ -1,6 +1,8 @@
-# Quetzal - Text Editor (beta)
+# Quetzal Text Editor
 
-Quetzal is an open source text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features. It's the rebranding of an [old project](https://github.com/badwolfie/simple-text) of mine.
+:warning: ***Warning: This is an experimental build, this project is currently being rebranded and ported to C from and old project of mine. So, in the meanwhile, you can use my old project ([Simple Text](https://github.com/badwolfie/simple-text)) to test the features that are planned for this one.***
+
+Quetzal is an open source text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features.
 
 ## Installation
 
