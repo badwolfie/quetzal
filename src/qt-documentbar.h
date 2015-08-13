@@ -42,4 +42,6 @@ QtDocument * qt_document_bar_get_current_doc (QtDocumentBar * self);
 GList * qt_document_bar_get_doc_list (QtDocumentBar * self);
 GList * qt_document_bar_get_extra_doc_list (QtDocumentBar * self);
 
+void qt_document_bar_switch_doc (QtDocumentBar * self, QtDocument * doc);
+
 #endif /* QT_TAB_BAR_H */

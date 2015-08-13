@@ -58,7 +58,7 @@ qt_source_view_init (QtSourceView * self)
 static void 
 qt_source_view_class_init (QtSourceViewClass * class) 
 {
-	g_signal_new("buffer_modified", 
+	g_signal_new("buffer-modified", 
 							 QT_SOURCE_VIEW_TYPE, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
@@ -66,7 +66,7 @@ qt_source_view_class_init (QtSourceViewClass * class)
 							 G_TYPE_NONE, 1, 
 							 G_TYPE_BOOLEAN);
 	
-	g_signal_new("drag_n_drop", 
+	g_signal_new("drag-n-drop", 
 							 QT_SOURCE_VIEW_TYPE, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
@@ -74,14 +74,14 @@ qt_source_view_class_init (QtSourceViewClass * class)
 							 G_TYPE_NONE, 1, 
 							 G_TYPE_FILE);
 	
-	g_signal_new("file_saved", 
+	g_signal_new("file-saved", 
 							 QT_SOURCE_VIEW_TYPE, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
 							 g_cclosure_marshal_VOID__VOID,
 							 G_TYPE_NONE, 0);
 	
-	g_signal_new("file_loaded", 
+	g_signal_new("file-loaded", 
 							 QT_SOURCE_VIEW_TYPE, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
@@ -264,16 +264,16 @@ qt_source_view_create_components (QtSourceView * self, GFile * file)
 {
 	self->priv->source_file = gtk_source_file_new();
 	if (file != NULL) {
-		gtk_source_file_set_location(self->priv->source_file, file);
+    gtk_source_file_set_location(self->priv->source_file, file);
 		self->priv->word_completion = gtk_source_completion_words_new(
 			_ ("Document words"), NULL
 		);
 		
 		g_object_set(G_OBJECT (self->priv->word_completion),
+			"interactive-delay", 25, 
 			"activation", 
 			GTK_SOURCE_COMPLETION_ACTIVATION_USER_REQUESTED | 
 				GTK_SOURCE_COMPLETION_ACTIVATION_INTERACTIVE, 
-			"interactive-delay", 25, 
 			NULL
 		);
 		
@@ -291,7 +291,13 @@ qt_source_view_create_components (QtSourceView * self, GFile * file)
 			g_error("gtk_source_completion_add_provider error: %s", 
 					    inner_error->message);
 			g_error_free(inner_error);
-		}
+    }
+                     
+    g_object_set(G_OBJECT (completion), 
+      "show-headers", FALSE, 
+      "show-icons", TRUE, 
+      NULL
+    );
 	}
 	
 	GtkSourceStyleSchemeManager * scheme_manager = 
@@ -494,8 +500,7 @@ qt_source_view_set_properties (QtSourceView * self)
 		self->priv->search_settings, TRUE
 	);
 	
-	g_signal_connect (GTK_WIDGET (self), 
-									  "drag-data-received", 
+	g_signal_connect (self, "drag-data-received", 
 									  G_CALLBACK (qt_source_view_on_drag_data_received), 
 									  self);
 }
@@ -531,9 +536,26 @@ qt_source_view_change_language (QtSourceView * self, const gchar * language)
 }
 
 static void 
+qt_source_view_on_buffer_changes (GtkTextBuffer * sender, gpointer data) 
+{
+  QtSourceView * self = QT_SOURCE_VIEW (data);
+  GtkSourceCompletionWords * completion = self->priv->word_completion;
+  
+  GtkSourceBuffer * buffer = qt_source_view_get_source_buffer(self);
+  gboolean is_modified = gtk_text_buffer_get_modified(GTK_TEXT_BUFFER (buffer));
+  
+  gtk_source_completion_words_register(completion, GTK_TEXT_BUFFER (buffer));
+  g_signal_emit_by_name(self, "buffer-modified", is_modified);
+}
+
+static void 
 qt_source_view_connect_signals (QtSourceView * self) 
 {
-	
+  GtkSourceBuffer * buffer = qt_source_view_get_source_buffer(self);
+  g_signal_connect (GTK_TEXT_BUFFER (buffer), 
+                    "modified-changed", 
+                    G_CALLBACK (qt_source_view_on_buffer_changes), 
+                    self);
 }
 
 QtSourceView * 

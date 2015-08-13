@@ -48,5 +48,6 @@ QtSourceView * qt_document_get_doc_view (QtDocument * self);
 GtkScrolledWindow * qt_document_get_doc_scroll (QtDocument * self);
 
 void qt_document_mark_title (QtDocument * self);
+void qt_document_refresh_title (QtDocument * self);
 
 #endif /* QT_DOCUMENT_H */

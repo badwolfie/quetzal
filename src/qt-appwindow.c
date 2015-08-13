@@ -78,6 +78,21 @@ static void
 qt_app_window_class_init (QtAppWindowClass * class) 
 {}
 
+static void 
+qt_app_window_check_doc_count (QtAppWindow * self) 
+{
+  GList * open_docs = qt_document_bar_get_doc_list(self->priv->doc_bar);
+  GList * open_extra_docs = 
+    qt_document_bar_get_extra_doc_list(self->priv->doc_bar);
+  gint opened_docs_count = 
+    g_list_length(open_docs) + g_list_length(open_extra_docs);
+  
+  if (opened_docs_count == 0) {
+    gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->header_bar), "");
+    gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->fs_header_bar), "");
+  }
+}
+
 QtTextEditor * 
 qt_app_window_get_editor (QtAppWindow * self) 
 {
@@ -217,6 +232,29 @@ qt_app_window_on_drag_n_drop (QtDocument * sender,
 }
 
 static void 
+qt_app_window_changes_done (QtSourceView * sender, 
+                            gboolean buffer_modified, 
+                            gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  QtDocument * current_doc = 
+    qt_document_bar_get_current_doc(self->priv->doc_bar);
+  
+  gboolean doc_modified = qt_document_get_doc_is_modified(current_doc);
+  
+  if (buffer_modified) {
+    if (!doc_modified) {
+      // refrescar statusbar 
+      qt_document_set_doc_is_modified(current_doc, TRUE);
+    }
+  } else {
+    if (doc_modified) {
+      qt_document_set_doc_is_modified(current_doc, FALSE);
+    }
+  }
+}
+
+static void 
 qt_app_window_add_new_doc (QtAppWindow * self, QtDocument * new_doc) 
 {
   g_signal_connect (new_doc, "view-drag-n-drop", 
@@ -225,15 +263,21 @@ qt_app_window_add_new_doc (QtAppWindow * self, QtDocument * new_doc)
   
 	const gchar * doc_name = g_strdup_printf("tab - %d", self->priv->counter++);
   GtkScrolledWindow * doc_scroll = qt_document_get_doc_scroll(new_doc);
-	// gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
-  gtk_stack_add_titled(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name, doc_name);
-	qt_document_bar_add_doc(self->priv->doc_bar, new_doc); // ERROR AQUI!!
+	gtk_stack_add_named(self->priv->documents, GTK_WIDGET (doc_scroll), doc_name);
+	qt_document_bar_add_doc(self->priv->doc_bar, new_doc);
+  
+  QtSourceView * doc_view = qt_document_get_doc_view(new_doc);
+  g_signal_connect (G_OBJECT (doc_view), 
+                    "buffer-modified", 
+                    G_CALLBACK (qt_app_window_changes_done), 
+                    self);
 	
 	const gchar * header_title = g_strdup(qt_document_get_doc_path(new_doc));
   gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->fs_header_bar), 
                               header_title);
   gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->header_bar), 
                               header_title);
+  qt_app_window_check_doc_count(self);
 }
 
 void 
@@ -247,14 +291,16 @@ qt_app_window_create_new_doc (GObject * sender, gpointer data)
 static void 
 qt_app_window_add_doc_from_file (QtAppWindow * self, GFile * file) 
 {
-  if (qt_document_bar_doc_is_opened(self->priv->doc_bar, file)) 
+  if (qt_document_bar_doc_is_opened(self->priv->doc_bar, file)) {
+    qt_app_window_check_doc_count(self);
     return ;
+  }
   
   QtDocument * doc = qt_document_new(self->priv->editor, file);
   qt_app_window_add_new_doc(self, doc);
   
   /* refrescar lenguaje */
-  /* checar docs */
+  qt_app_window_check_doc_count(self);
 }
 
 static void 
@@ -370,6 +416,47 @@ qt_app_window_save_doc_to_file (GObject * sender, gpointer data)
 }
 
 static void 
+qt_app_window_on_doc_switched (GtkWidget * sender, 
+                               QtDocument * doc, 
+                               gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  const gchar * doc_path = qt_document_get_doc_path(doc);
+  gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->header_bar), 
+                              doc_path);
+  gtk_header_bar_set_subtitle(GTK_HEADER_BAR (self->priv->fs_header_bar), 
+                              doc_path);
+  
+  if (gtk_widget_get_visible(GTK_WIDGET (self->priv->terminal))) {
+    vte_terminal_reset(self->priv->terminal, TRUE, TRUE);
+    gtk_widget_hide(GTK_WIDGET (self->priv->terminal));
+  }
+  
+  QtSourceView * doc_view = qt_document_get_doc_view(doc);
+  gtk_widget_grab_focus(GTK_WIDGET (doc_view));
+  /* refrescar lenguaje */
+}
+
+static void 
+qt_app_window_on_doc_closed (GtkWidget * sender, 
+                             QtDocument * doc, 
+                             gpointer data) 
+{
+  QtAppWindow * self = QT_APP_WINDOW (data);
+  /* agregar para re-abrir */
+  
+  gtk_widget_destroy(GTK_WIDGET (qt_document_get_doc_scroll(doc)));
+  gtk_widget_destroy(GTK_WIDGET (doc));
+  qt_app_window_check_doc_count(self);
+  
+  QtDocument * current_doc = 
+    qt_document_bar_get_current_doc(self->priv->doc_bar);
+  qt_document_bar_switch_doc(self->priv->doc_bar, current_doc);
+  
+  /* refrescar lenguaje */
+}
+
+static void 
 qt_app_window_create_widgets (QtAppWindow * self) 
 {
 	GtkSettings * gtk_settings = gtk_settings_get_default();
@@ -425,16 +512,21 @@ qt_app_window_create_widgets (QtAppWindow * self)
   /* doc_bar */
 	self->priv->doc_bar = qt_document_bar_new();
 	qt_document_bar_set_stack(self->priv->doc_bar, self->priv->documents);
-	// conectar señales 
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_bar));
+	
+  g_signal_connect (self->priv->doc_bar, 
+                    "doc-switched", 
+                    G_CALLBACK (qt_app_window_on_doc_switched), 
+                    self);
+  
+  g_signal_connect (self->priv->doc_bar, 
+                    "doc-closed", 
+                    G_CALLBACK (qt_app_window_on_doc_closed), 
+                    self);
 	
 	/* statusbar */
   
-  GtkStackSwitcher * switcher = GTK_STACK_SWITCHER (gtk_stack_switcher_new());
-  gtk_stack_switcher_set_stack(switcher, self->priv->documents);
-  gtk_header_bar_set_custom_title(GTK_HEADER_BAR (self->priv->header_bar), GTK_WIDGET (switcher));
-  gtk_widget_show(GTK_WIDGET (switcher));
-	
+  
 	GtkSeparator * separator = 
 		GTK_SEPARATOR (gtk_separator_new(GTK_ORIENTATION_HORIZONTAL));
 		
@@ -447,7 +539,7 @@ qt_app_window_create_widgets (QtAppWindow * self)
 										 FALSE, TRUE, 0);
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (self->priv->doc_bar),
-										 FALSE, TRUE, 5);
+										 FALSE, TRUE, 7);
 	gtk_box_pack_start(vbox, 
 										 GTK_WIDGET (separator),
 										 FALSE, TRUE, 0);
@@ -607,8 +699,8 @@ qt_app_window_connect_signals (QtAppWindow * self)
 									  self);
 	g_action_map_add_action(G_ACTION_MAP (self), G_ACTION (action_toggle_search));
   
-  g_signal_connect (GTK_WIDGET (self), 
-                    "destroy", G_CALLBACK (qt_app_window_quit_cb), 
+  g_signal_connect (self, "destroy", 
+                    G_CALLBACK (qt_app_window_quit_cb), 
                     self);
 }
 

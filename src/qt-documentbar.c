@@ -95,6 +95,26 @@ qt_document_bar_doc_is_opened (QtDocumentBar * self, GFile * file)
   return FALSE;
 }
 
+static gboolean 
+qt_document_bar_toggle_extra_menu_cb (GtkWidget * sender, 
+                                      GdkEvent * event, 
+                                      gpointer data) 
+{
+  QtDocumentBar * self = QT_DOCUMENT_BAR (data);
+  GtkPopover * extra_menu = self->priv->extra_popover;
+  
+  gboolean extra_menu_is_visible = 
+    gtk_widget_get_visible(GTK_WIDGET (extra_menu));
+  
+  if (extra_menu_is_visible) {
+    gtk_widget_hide(GTK_WIDGET (extra_menu));
+  } else {
+    gtk_widget_show_all(GTK_WIDGET (extra_menu));
+  }
+  
+  return TRUE;
+}
+
 static void 
 qt_document_bar_create_widgets (QtDocumentBar * self) 
 {
@@ -108,7 +128,10 @@ qt_document_bar_create_widgets (QtDocumentBar * self)
 	g_object_set (GTK_WIDGET (self->priv->extra_menu), 
 							  "width-request", 20,   
 							  NULL);
-	/* conectar señal */
+	g_signal_connect (self->priv->extra_menu, 
+                    "button-press-event", 
+                    G_CALLBACK (qt_document_bar_toggle_extra_menu_cb), 
+                    self);
 	
 	self->priv->extra_label = GTK_LABEL (gtk_label_new(""));
 	gtk_label_set_use_markup(self->priv->extra_label, TRUE);
@@ -193,7 +216,8 @@ g_timeout_args_destroy (void * data)
   free(args);
 }
 
-static gboolean g_timeout_func_cb (gpointer data) 
+static gboolean 
+g_timeout_func_cb (gpointer data) 
 {
   GTimeoutArgs * args = (GTimeoutArgs *) data;
   switch (args->label_timeout) {
@@ -225,6 +249,117 @@ static gboolean g_timeout_func_cb (gpointer data)
   return TRUE;
 }
 
+static void 
+qt_document_bar_refresh_each_title (gpointer data, gpointer user_data) 
+{
+  if (!QT_IS_DOCUMENT (data)) return ;
+  QtDocument * entry = QT_DOCUMENT (data);
+  qt_document_refresh_title(entry);
+}
+
+static void 
+qt_document_bar_refresh_marked (QtDocumentBar * self) 
+{
+  GList * open_docs = qt_document_bar_get_doc_list(self);
+  GList * open_extra_docs = qt_document_bar_get_extra_doc_list(self);
+  
+  if (open_docs != NULL) 
+    g_list_foreach(open_docs, qt_document_bar_refresh_each_title, NULL);
+  if (open_extra_docs != NULL)
+    g_list_foreach(open_extra_docs, qt_document_bar_refresh_each_title, NULL);
+  
+}
+
+void 
+qt_document_bar_switch_doc (QtDocumentBar * self, QtDocument * doc)
+{
+  GtkScrolledWindow * visible_child = qt_document_get_doc_scroll(doc);
+  gtk_stack_set_visible_child(self->priv->stack, GTK_WIDGET (visible_child));
+  qt_document_bar_refresh_marked(self);
+  qt_document_mark_title(doc);
+  
+  g_signal_emit_by_name(self, "doc-switched", doc);
+}
+
+static void 
+qt_document_bar_switch_doc_cb (QtDocument * sender, 
+                               QtDocument * doc, 
+                               gpointer data) 
+{
+  QtDocumentBar * self = QT_DOCUMENT_BAR (data);
+  qt_document_bar_switch_doc(self, doc);
+}
+
+void 
+qt_document_bar_close_doc (QtDocumentBar * self, QtDocument * doc) 
+{
+  if (doc == NULL) return ;
+  
+  GList * docs = qt_document_bar_get_doc_list(self);
+  GList * extra_docs = qt_document_bar_get_extra_doc_list(self);
+  
+  gint doc_index = g_list_index(docs, doc);
+  if (doc_index != -1) {
+    // docs = g_list_remove(docs, doc);
+    self->priv->doc_num--;
+    
+    if (self->priv->doc_extra_num > 0) {
+      gpointer first = g_list_first(extra_docs)->data;
+      QtDocument * aux_doc = QT_DOCUMENT (g_object_ref(first));
+      
+      if (aux_doc != NULL) {
+        gtk_container_remove(GTK_CONTAINER (self->priv->extra_box), 
+                             GTK_WIDGET (aux_doc));
+        qt_document_bar_add_doc(self, aux_doc);
+        self->priv->doc_extra_num--;
+        
+        const gchar * extra_menu_tooltip = 
+          g_strdup_printf(_ ("Hidden tabs: %d"), self->priv->doc_extra_num);
+		    gtk_widget_set_tooltip_text(GTK_WIDGET (self->priv->extra_menu), 
+                                    extra_menu_tooltip);
+		
+        GTimeoutArgs * timeout_args = g_timeout_args_new(self, FALSE);
+		    g_timeout_add_full(G_PRIORITY_HIGH, 250,
+                           g_timeout_func_cb, 
+                           timeout_args, 
+                           g_timeout_args_destroy);
+      }
+    }
+  }
+  
+  doc_index = g_list_index(extra_docs, doc);
+  if (doc_index != -1) {
+    // extra_docs = g_list_remove(extra_docs, doc);
+    self->priv->doc_extra_num--;
+    
+    const gchar * extra_menu_tooltip = 
+      g_strdup_printf(_ ("Hidden tabs: %d"), self->priv->doc_extra_num);
+		gtk_widget_set_tooltip_text(GTK_WIDGET (self->priv->extra_menu), 
+                                extra_menu_tooltip);
+		
+    GTimeoutArgs * timeout_args = g_timeout_args_new(self, FALSE);
+		g_timeout_add_full(G_PRIORITY_HIGH, 250,
+                       g_timeout_func_cb, 
+                       timeout_args, 
+                       g_timeout_args_destroy);
+  }
+  
+  if ((self->priv->doc_num <= 5) && (self->priv->doc_extra_num == 0)) {
+    gtk_widget_hide(GTK_WIDGET (self->priv->extra_menu));
+  }
+  
+  g_signal_emit_by_name(self, "doc-closed", doc);
+}
+
+static void 
+qt_document_bar_close_doc_cb (QtDocument * sender, 
+                              QtDocument * doc, 
+                              gpointer data) 
+{
+  QtDocumentBar * self = QT_DOCUMENT_BAR (data);
+  qt_document_bar_close_doc(self, doc);
+}
+
 void 
 qt_document_bar_add_doc (QtDocumentBar * self, QtDocument * doc) 
 {
@@ -252,7 +387,19 @@ qt_document_bar_add_doc (QtDocumentBar * self, QtDocument * doc)
                        timeout_args, 
                        g_timeout_args_destroy);
 	}
-} 
+  
+  g_signal_connect (doc, "doc-clicked", 
+                    G_CALLBACK (qt_document_bar_switch_doc_cb), 
+                    self);
+  
+  g_signal_connect (doc, "close-clicked", 
+                    G_CALLBACK (qt_document_bar_close_doc_cb),
+                    self);
+  
+  qt_document_bar_switch_doc(self, doc);
+  qt_document_bar_refresh_marked(self);
+  qt_document_mark_title(doc);
+}
 
 static void 
 qt_document_bar_init (QtDocumentBar * self) 
@@ -260,7 +407,23 @@ qt_document_bar_init (QtDocumentBar * self)
 
 static void 
 qt_document_bar_class_init (QtDocumentBarClass * class) 
-{}
+{
+  g_signal_new("doc-closed", 
+							 QT_DOCUMENT_BAR_TYPE, 
+							 G_SIGNAL_RUN_LAST, 0, 
+							 NULL, NULL, 
+							 g_cclosure_marshal_VOID__OBJECT,
+							 G_TYPE_NONE, 1, 
+							 QT_TYPE_DOCUMENT);
+  
+  g_signal_new("doc-switched", 
+							 QT_DOCUMENT_BAR_TYPE, 
+							 G_SIGNAL_RUN_LAST, 0, 
+							 NULL, NULL, 
+							 g_cclosure_marshal_VOID__OBJECT,
+							 G_TYPE_NONE, 1, 
+							 QT_TYPE_DOCUMENT);
+}
 
 QtDocumentBar * 
 qt_document_bar_new (void) 

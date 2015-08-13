@@ -62,7 +62,7 @@ qt_document_on_drag_n_drop (QtSourceView * sender,
   g_signal_emit_by_name(self, "view-drag-n-drop", file);
 }
 
-static void 
+void 
 qt_document_refresh_title (QtDocument * self) 
 {
 	if (self->priv->title_label != NULL) {
@@ -151,15 +151,23 @@ qt_document_get_doc_scroll (QtDocument * self)
 	return self->priv->doc_scroll;
 }
 
-/* signal senders */
 static gboolean 
 qt_document_on_doc_clicked_cb (GtkWidget * sender, 
                                GdkEvent * event, 
                                gpointer data) 
 {
   QtDocument * self = QT_DOCUMENT (data);
-  g_signal_emit_by_name(sender, "tab-clicked", self);
-  qt_document_mark_title(self);
+  g_signal_emit_by_name(self, "doc-clicked", self);
+  return TRUE;
+}
+
+static gboolean 
+qt_document_on_doc_closed_cb (GtkWidget * sender, 
+                              GdkEvent * event, 
+                              gpointer data) 
+{
+  QtDocument * self = QT_DOCUMENT (data);
+  g_signal_emit_by_name(self, "close-clicked", self);
   return TRUE;
 }
 
@@ -182,11 +190,15 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 	g_object_set(GTK_CONTAINER (self->priv->close_button), 
                "child", close_img,
 							 NULL);
-	/*conectar señal*/
+	g_signal_connect (self->priv->close_button, "button-press-event", 
+                    G_CALLBACK (qt_document_on_doc_closed_cb), 
+                    self);
 	
 	self->priv->evt_box = GTK_EVENT_BOX (gtk_event_box_new());
 	gtk_event_box_set_above_child(self->priv->evt_box, TRUE);
-	/*conectar señal*/
+	g_signal_connect (self->priv->evt_box, "button-press-event", 
+                    G_CALLBACK (qt_document_on_doc_clicked_cb), 
+                    self);
 	
 	gtk_box_pack_start(GTK_BOX (self), 
 										 GTK_WIDGET (self->priv->evt_box), 
@@ -195,8 +207,7 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 										 GTK_WIDGET (self->priv->close_button), 
 										 FALSE, TRUE, 0);
 	self->priv->doc_view = qt_source_view_new(self->priv->editor, file);
-	g_signal_connect (self->priv->doc_view, 
-                    "drag_n_drop", 
+	g_signal_connect (self->priv->doc_view, "drag-n-drop", 
                     G_CALLBACK (qt_document_on_drag_n_drop), 
                     self);
 	gtk_widget_show(GTK_WIDGET (self->priv->doc_view));
@@ -233,7 +244,7 @@ qt_document_create_widgets (QtDocument * self, GFile * file)
 static void 
 qt_document_class_init (QtDocumentClass * class) 
 {
-	g_signal_new("close_clicked", 
+	g_signal_new("close-clicked", 
 							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
@@ -241,15 +252,15 @@ qt_document_class_init (QtDocumentClass * class)
 							 G_TYPE_NONE, 1, 
 							 QT_TYPE_DOCUMENT);
 	
-	g_signal_new("tab_clicked", 
+	g_signal_new("doc-clicked",
 							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
 							 g_cclosure_marshal_VOID__OBJECT,
 							 G_TYPE_NONE, 1, 
-							 QT_TYPE_DOCUMENT);
+               QT_TYPE_DOCUMENT);
 	
-	g_signal_new("view_drag_n_drop", 
+	g_signal_new("view-drag-n-drop", 
 							 QT_TYPE_DOCUMENT, 
 							 G_SIGNAL_RUN_LAST, 0, 
 							 NULL, NULL, 
