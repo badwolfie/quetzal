@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema path="/com/github/badwolfie/quetzal/" id="com.github.badwolfie.quetzal" gettext-domain="quetzal">
+  <schema path="/io/github/badwolfie/quetzal/" id="io.github.badwolfie.quetzal" gettext-domain="quetzal">
     <key type="b" name="show-line-numbers">
       <default>false</default>
       <summary>Show line numbers</summary>

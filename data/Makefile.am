@@ -1,6 +1,6 @@
 SUBDIRS = icons
 
-gsettings_SCHEMAS = com.github.badwolfie.quetzal.gschema.xml
+gsettings_SCHEMAS = io.github.badwolfie.quetzal.gschema.xml
 @GSETTINGS_RULES@
 
 desktopdir = $(datadir)/applications

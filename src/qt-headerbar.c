@@ -57,7 +57,7 @@ static void
 qt_header_bar_create_widgets (QtHeaderBar * self) 
 {
 	GtkBuilder * builder = gtk_builder_new_from_resource(
-		"/com/github/badwolfie/quetzal/quetzal-menu.ui"
+		"/io/github/badwolfie/quetzal/quetzal-menu.ui"
 	);
 	
 	self->priv->menu_button = GTK_MENU_BUTTON (gtk_menu_button_new());

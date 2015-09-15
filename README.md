@@ -1,8 +1,14 @@
 # Quetzal Text Editor
 
-:warning: ***Warning: This is an experimental build, this project is currently being rebranded and ported to C from and old project of mine. So, in the meanwhile, you can use my old project ([Simple Text](https://github.com/badwolfie/simple-text)) to test the features that are planned for this one.***
+:warning: ***Warning: This is an experimental build, this project is currently 
+being rebranded and ported to C from and old project of mine. So, in the 
+meanwhile, you can use my old project 
+([Simple Text](https://github.com/badwolfie/simple-text)) to test the features 
+that are planned for this one.***
 
-Quetzal is an open source text and code editor written in C using the GTK+3 toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide its features.
+Quetzal is an open source text and code editor written in C using the GTK+3 
+toolkit, taking advantage of the GTKSourceView, VTE and others tools to provide 
+its features.
 
 ## Installation
 
@@ -28,12 +34,13 @@ Then, simply do:
 	# make install
 ```
 
-Or check the [releases page](https://github.com/badwolfie/quetzal/releases) for distribution-based installation options. 
+Or check the [releases page](https://github.com/badwolfie/quetzal/releases) for 
+distribution-based installation options. 
 
 ## Shortcuts
 | Key | Action |
 |:---:|:---|
-| Ctrl + B | Build project (You need to create a Makefile in the project's directory before using this feature) |
+| Ctrl + B | Build project *(You need to create a Makefile in the project's directory before using this feature)* |
 | Ctrl + Shift + C | Toggle embeded terminal |
 | Ctrl + F | Toggle searching mode |
 | Ctrl + N | Open a new file |

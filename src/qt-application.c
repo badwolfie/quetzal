@@ -218,7 +218,7 @@ qt_application_startup (GApplication * self)
 																			 quit_accels);
 	
 	QT_APPLICATION (self)->priv->settings = 
-		g_settings_new("com.github.badwolfie.quetzal");
+		g_settings_new("io.github.badwolfie.quetzal");
 	
 	QtTextEditor * editor = qt_text_editor_new();
 	
@@ -339,7 +339,7 @@ qt_application_startup (GApplication * self)
 	);
 	
 	GtkBuilder * builder = gtk_builder_new_from_resource(
-		"/com/github/badwolfie/quetzal/quetzal-menu.ui");
+		"/io/github/badwolfie/quetzal/quetzal-menu.ui");
 	GMenuModel * app_menu = G_MENU_MODEL (
 		gtk_builder_get_object(builder, "appmenu"));
 	gtk_application_set_app_menu(GTK_APPLICATION (self), app_menu);
@@ -558,7 +558,7 @@ qt_application_new (void)
 {
 	QtApplication * new_app = g_object_new (
 		QT_APPLICATION_TYPE, 
-		"application-id", "com.github.badwolfie.quetzal.app", 
+		"application-id", "io.github.badwolfie.quetzal.app",
 		"flags", G_APPLICATION_HANDLES_OPEN, 
 		NULL
 	);
