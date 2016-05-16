@@ -18,7 +18,7 @@
 
 #include "config.h"
 #include <glib/gi18n.h>
-#include "qt-application.h"
+// #include "qt-application.h"
 
 #include "quetzal.h"
 
@@ -33,5 +33,6 @@ main (int argc, char * argv[])
   g_set_application_name(_ (QUETZAL_NAME));
   g_set_prgname(QUETZAL_NAME);
   
-  return g_application_run (G_APPLICATION (qt_application_new()), argc, argv);
+  // return g_application_run (G_APPLICATION (qt_application_new()), argc, argv);
+  return 0;
 }
