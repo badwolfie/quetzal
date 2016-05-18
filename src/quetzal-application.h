@@ -1,6 +1,6 @@
-/* qt-application.h
+/* quetzal-application.h
  *
- * Copyright (C) 2015 Ian Hernandez <ihernandezs@openmailbox.org>
+ * Copyright (C) 2016 Ian Hernandez <ihernandezs@openmailbox.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef QTAPPLICATION_H
-#define QTAPPLICATION_H
+#ifndef QUETZAL_APPLICATION__H
+#define QUETZAL_APPLICATION__H
 
 #include <gtk/gtk.h>
 
-#define QT_APPLICATION_TYPE (qt_application_get_type ())
-#define QT_APPLICATION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), QT_APPLICATION_TYPE, QtApplication))
+#define QUETZAL_TYPE_APPLICATION (quetzal_application_get_type ())
+#define QUETZAL_APPLICATION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), QUETZAL_TYPE_APPLICATION, QuetzalApplication))
 
-typedef struct _QtApplication QtApplication;
-typedef struct _QtApplicationClass QtApplicationClass;
-typedef struct _QtApplicationPrivate QtApplicationPrivate;
+typedef struct _QuetzalApplication QuetzalApplication;
+typedef struct _QuetzalApplicationClass QuetzalApplicationClass;
+typedef struct _QuetzalApplicationPrivate QuetzalApplicationPrivate;
 
-GType qt_application_get_type (void);
-QtApplication * qt_application_new (void);
+GType quetzal_application_get_type (void);
+QuetzalApplication * quetzal_application_new (void);
 
-#endif /* QTAPPLICATION_H */
+#endif /* QUETZAL_APPLICATION__H */
+

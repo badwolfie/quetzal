@@ -1,4 +1,4 @@
-/* quetzal.h
+/* quetzal-appwindow.h
  *
  * Copyright (C) 2016 Ian Hernandez <ihernandezs@openmailbox.org>
  *
@@ -15,25 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QUETZAL__H
-#define QUETZAL__H
+#ifndef QUETZAL_APPWINDOW__H
+#define QUETZAL_APPWINDOW__H
 
-#include <glib.h>
+#include <gtk/gtk.h>
 
-#define QUETZAL_NAME "Quetzal Text Editor"
-#define QUETZAL_SHORTDESC "A simple and lightweight text and code editor." 
+#include "quetzal-application.h"
 
-#define QUETZAL_MAJOR_VERSION (0)
-#define QUETZAL_MINOR_VERSION (1)
-#define QUETZAL_MICRO_VERSION (0)
+#define QUETZAL_TYPE_APPWINDOW (quetzal_appwindow_get_type ())
+#define QUETZAL_APPWINDOW(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), QUETZAL_TYPE_APPWINDOW, QuetzalAppwindow))
 
-#define QUETZAL_VERSION (g_strdup_printf("%d.%d.%d", QUETZAL_MAJOR_VERSION, QUETZAL_MINOR_VERSION, QUETZAL_MICRO_VERSION))
+typedef struct _QuetzalAppwindow QuetzalAppwindow;
+typedef struct _QuetzalAppwindowClass QuetzalAppwindowClass;
+typedef struct _QuetzalAppwindowPrivate QuetzalAppwindowPrivate;
 
-#define QUETZAL_CHECK_VERSION (major, minor, micro) (\
-  QUETZAL_MAJOR_VERSION > (major) || \
-  QUETZAL_MAJOR_VERSION == (major) && QUETZAL_MINOR_VERSION > (minor) || \
-  QUETZAL_MAJOR_VERSION == (major) && QUETZAL_MINOR_VERSION == (minor) && QUETZAL_MICRO_VERSION >= (micro) \
-)
+GType quetzal_appwindow_get_type (void);
+QuetzalAppwindow * quetzal_appwindow_new (QuetzalApplication * application);
 
-#endif /* QUETZAL__H */
+#endif /* QUETZAL_APPWINDOW__H */
 
