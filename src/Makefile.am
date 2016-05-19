@@ -8,6 +8,7 @@ resources.c: $(top_srcdir)/data/quetzal.gresource.xml $(shell $(GLIB_COMPILE_RES
 quetzal_SOURCES = \
 	quetzal-application.c quetzal-application.h \
 	quetzal-appwindow.c quetzal-appwindow.h \
+	quetzal-headerbar.c quetzal-headerbar.h \
 	quetzal.c quetzal.h \
 	$(BUILT_SOURCES)
 

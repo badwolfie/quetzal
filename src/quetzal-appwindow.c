@@ -18,7 +18,7 @@
 #include <glib/gi18n.h>
 
 #include "quetzal-appwindow.h"
-
+#include "quetzal-headerbar.h"
 #include "config.h"
 
 struct _QuetzalAppwindow
@@ -34,7 +34,8 @@ struct _QuetzalAppwindowClass
 
 struct _QuetzalAppwindowPrivate
 {
-  int id;
+  QuetzalHeaderbar * headerbar;
+  QuetzalHeaderbar * fs_headerbar;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (QuetzalAppwindow, quetzal_appwindow, GTK_TYPE_APPLICATION_WINDOW);
@@ -73,7 +74,14 @@ quetzal_appwindow_class_init (QuetzalAppwindowClass * class)
 
 static void
 quetzal_appwindow_create_widgets (QuetzalAppwindow * self)
-{}
+{
+  self->priv->headerbar = quetzal_headerbar_new (self);
+  self->priv->fs_headerbar = quetzal_headerbar_new (self);
+
+  gtk_window_set_titlebar (GTK_WINDOW (self),
+                           GTK_WIDGET (self->priv->headerbar));
+  gtk_widget_show (GTK_WIDGET (self->priv->headerbar));
+}
 
 static void
 quetzal_appwindow_connect_signals (QuetzalAppwindow * self)
