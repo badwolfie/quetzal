@@ -14,6 +14,7 @@
     <license rdf:resource="http://spdx.org/licenses/GPL-2.0+" />
 
     <programming-language>HTML</programming-language>
+    <programming-language>JavaScript</programming-language>
     <programming-language>CSS</programming-language>
 
     <maintainer>
